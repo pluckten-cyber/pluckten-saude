@@ -4,7 +4,7 @@
   "private": true,
   "description": "Loja e painel administrativo da Pluckten Saúde.",
   "scripts": {
-    "start": "node server.js",
+    "dev": "node server.js",
     "check": "node --check server.js && node --check server-core.js && node --check script.js && node --check admin.js"
   },
   "dependencies": {

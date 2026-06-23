@@ -56,7 +56,7 @@ https://seu-dominio.vercel.app/admin.html
 
 ```powershell
 npm install
-npm start
+npm run dev
 ```
 
 Loja local:
