@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin | Pluckten Saúde</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+  </head>
+  <body class="admin-page">
+    <main class="admin-shell">
+      <section class="login-card" data-login-view>
+        <img src="assets/pluckten-logo-crop.png" alt="Pluckten Saúde">
+        <p class="eyebrow">Área administrativa</p>
+        <h1>Entre para administrar a loja.</h1>
+        <form data-login-form>
+          <label class="admin-field">
+            Senha
+            <input name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="button primary full" type="submit">Entrar</button>
+          <p class="admin-message" data-login-message></p>
+        </form>
+      </section>
+
+      <section class="admin-app" data-admin-view hidden>
+        <header class="admin-topbar">
+          <a class="brand" href="/">
+            <img src="assets/pluckten-logo-crop.png" alt="Pluckten Saúde">
+          </a>
+          <div>
+            <a class="button ghost" href="/" target="_blank" rel="noreferrer">Ver loja</a>
+            <button class="button ghost" type="button" data-logout>Sair</button>
+          </div>
+        </header>
+
+        <section class="admin-hero">
+          <div>
+            <p class="eyebrow">Painel Pluckten</p>
+            <h1>Produtos, pedidos e prazos em um lugar.</h1>
+          </div>
+          <div class="stats-grid">
+            <article>
+              <span data-stat-orders>0</span>
+              <strong>pedidos</strong>
+            </article>
+            <article>
+              <span data-stat-products>0</span>
+              <strong>produtos</strong>
+            </article>
+            <article>
+              <span data-stat-open>0</span>
+              <strong>em aberto</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="admin-grid">
+          <section class="admin-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Pedidos</p>
+                <h2>Vendas e prazos</h2>
+              </div>
+              <button class="button ghost" type="button" data-refresh>Atualizar</button>
+            </div>
+            <div class="order-list" data-order-list></div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Catálogo</p>
+                <h2>Produtos</h2>
+              </div>
+              <button class="button ghost" type="button" data-new-product>Novo</button>
+            </div>
+
+            <form class="product-form" data-product-form>
+              <input name="id" type="hidden">
+              <label class="admin-field">
+                Nome
+                <input name="name" required>
+              </label>
+              <div class="form-row">
+                <label class="admin-field">
+                  Categoria
+                  <input name="category" required>
+                </label>
+                <label class="admin-field">
+                  Embalagem
+                  <input name="pack" required>
+                </label>
+              </div>
+              <label class="admin-field">
+                Descrição
+                <textarea name="description" rows="3" required></textarea>
+              </label>
+              <div class="form-row">
+                <label class="admin-field">
+                  Preço
+                  <input name="price" type="number" min="0" step="0.01" required>
+                </label>
+                <label class="admin-field">
+                  Estoque
+                  <input name="stock" type="number" min="0" step="1" required>
+                </label>
+              </div>
+              <label class="admin-field">
+                URL da foto
+                <input name="image" placeholder="assets/produto.png ou https://...">
+              </label>
+              <label class="admin-field">
+                Enviar foto do computador
+                <input name="imageFile" type="file" accept="image/*">
+              </label>
+              <label class="switch-field">
+                <input name="active" type="checkbox" checked>
+                Produto ativo na loja
+              </label>
+              <button class="button primary full" type="submit">Salvar produto</button>
+              <p class="admin-message" data-product-message></p>
+            </form>
+
+            <div class="product-list" data-product-list></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

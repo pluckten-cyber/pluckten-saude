@@ -1,0 +1,16 @@
+{
+  "name": "pluckten-saude",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Loja e painel administrativo da Pluckten Saúde.",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check server-core.js && node --check script.js && node --check admin.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

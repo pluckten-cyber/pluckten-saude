@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pluckten Saúde | Catálogo hospitalar</title>
+    <meta
+      name="description"
+      content="Pluckten Saúde: catálogo inicial de produtos hospitalares com atendimento direto pelo WhatsApp."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#inicio" aria-label="Pluckten Saúde">
+        <img src="assets/pluckten-logo-crop.png" alt="Pluckten Saúde">
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a href="#produtos">Catálogo</a>
+        <a href="#confianca">Como vendemos</a>
+        <a href="#contato">Contato</a>
+      </nav>
+
+      <button class="cart-button" type="button" data-cart-open>
+        Pedido
+        <span data-cart-count>0</span>
+      </button>
+    </header>
+
+    <main id="inicio">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Pluckten Saúde</p>
+          <h1>Suprimentos hospitalares com atendimento direto, claro e sem compra no escuro.</h1>
+          <p>
+            Um catálogo enxuto para clínicas, cuidadores e compras domiciliares.
+            Você monta a lista, a Pluckten confirma estoque, marcas, validade e entrega pelo WhatsApp.
+          </p>
+
+          <div class="hero-actions">
+            <a class="button primary" href="#produtos">Montar pedido</a>
+            <a class="button ghost" data-whatsapp-link href="#" target="_blank" rel="noreferrer">
+              Falar agora
+            </a>
+          </div>
+        </div>
+
+        <div class="brand-stage" aria-label="Marca Pluckten Saúde">
+          <img src="assets/pluckten-logo.png" alt="Logo Pluckten Saúde">
+          <div class="stage-card">
+            <span>Catálogo inicial</span>
+            <strong>10 itens essenciais</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="proof-bar" aria-label="Diferenciais da Pluckten Saúde">
+        <article>
+          <span>01</span>
+          <strong>Pedido assistido</strong>
+          <p>Fechamento pelo WhatsApp para confirmar tudo antes do envio.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <strong>Dados do produto</strong>
+          <p>Marca, lote, validade e regularização quando aplicável.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <strong>Compra com nota</strong>
+          <p>Organização para atender clínicas, empresas e clientes finais.</p>
+        </article>
+      </section>
+
+      <section class="catalog-section" id="produtos">
+        <div class="section-heading">
+          <p class="eyebrow">Prateleira inicial</p>
+          <h2>Escolha os produtos e envie sua lista.</h2>
+          <p>
+            Os preços abaixo são uma base de lançamento. Antes de publicar,
+            substitua por valores, marcas e disponibilidade reais dos seus fornecedores.
+          </p>
+        </div>
+
+        <div class="product-grid" data-product-grid></div>
+      </section>
+
+      <section class="process-section" id="confianca">
+        <div class="process-copy">
+          <p class="eyebrow">Como vendemos</p>
+          <h2>Menos vitrine vazia. Mais confirmação antes da compra.</h2>
+          <p>
+            Produto hospitalar precisa de clareza. Por isso a Pluckten funciona como
+            catálogo com atendimento: você recebe o pedido, confere estoque e fecha com segurança.
+          </p>
+        </div>
+
+        <div class="process-grid">
+          <article>
+            <span>1</span>
+            <h3>Cliente monta a lista</h3>
+            <p>O carrinho organiza quantidades e envia uma mensagem pronta.</p>
+          </article>
+          <article>
+            <span>2</span>
+            <h3>Você confirma detalhes</h3>
+            <p>Marca, lote, validade, frete, prazo e forma de pagamento.</p>
+          </article>
+          <article>
+            <span>3</span>
+            <h3>Pedido sai alinhado</h3>
+            <p>Sem promessa exagerada e com comunicação profissional.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="contact" id="contato">
+        <div>
+          <p class="eyebrow">Atendimento Pluckten</p>
+          <h2>Comece pelo essencial e venda com confiança.</h2>
+          <p>
+            Quer cotar para clínica, cuidador ou reposição doméstica?
+            Envie sua lista e receba a confirmação pelo WhatsApp.
+          </p>
+        </div>
+        <a class="button primary" data-whatsapp-link href="#" target="_blank" rel="noreferrer">
+          Chamar no WhatsApp
+        </a>
+      </section>
+    </main>
+
+    <aside class="cart-panel" data-cart-panel aria-hidden="true">
+      <div class="cart-backdrop" data-cart-close></div>
+      <section class="cart-drawer" aria-label="Pedido">
+        <div class="cart-header">
+          <div>
+            <p class="eyebrow">Lista Pluckten</p>
+            <h2>Pedido</h2>
+          </div>
+          <button class="icon-button" type="button" data-cart-close aria-label="Fechar pedido">×</button>
+        </div>
+
+        <div class="cart-items" data-cart-items></div>
+
+        <div class="cart-empty" data-cart-empty>
+          <strong>Nenhum item selecionado.</strong>
+          <p>Adicione produtos do catálogo para montar sua lista.</p>
+        </div>
+
+        <div class="cart-footer">
+          <div class="cart-total">
+            <span>Total estimado</span>
+            <strong data-cart-total>R$ 0,00</strong>
+          </div>
+          <button class="button primary full" type="button" data-checkout-open>
+            Finalizar pedido
+          </button>
+          <small>O valor final pode variar conforme marca, estoque, frete e impostos.</small>
+        </div>
+      </section>
+    </aside>
+
+    <aside class="checkout-modal" data-checkout-modal aria-hidden="true">
+      <div class="checkout-backdrop" data-checkout-close></div>
+      <form class="checkout-card" data-checkout-form>
+        <div class="checkout-head">
+          <div>
+            <p class="eyebrow">Dados do pedido</p>
+            <h2>Finalizar cotação</h2>
+          </div>
+          <button class="icon-button" type="button" data-checkout-close aria-label="Fechar formulário">×</button>
+        </div>
+
+        <label>
+          Nome completo
+          <input name="name" autocomplete="name" required>
+        </label>
+        <label>
+          WhatsApp
+          <input name="phone" autocomplete="tel" required>
+        </label>
+        <label>
+          E-mail
+          <input name="email" autocomplete="email">
+        </label>
+        <label>
+          CPF/CNPJ
+          <input name="document">
+        </label>
+        <label>
+          Endereço ou cidade para entrega
+          <textarea name="address" rows="3"></textarea>
+        </label>
+        <label>
+          Observações
+          <textarea name="notes" rows="3" placeholder="Ex.: melhor horário, marcas preferidas, urgência"></textarea>
+        </label>
+
+        <div class="checkout-status" data-checkout-status></div>
+        <button class="button primary full" type="submit">Enviar pedido</button>
+      </form>
+    </aside>
+
+    <footer class="site-footer">
+      <img src="assets/pluckten-logo-crop.png" alt="Pluckten Saúde">
+      <span>Produtos hospitalares e itens de cuidado. Consulte disponibilidade.</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
