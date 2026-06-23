@@ -1,0 +1,112 @@
+[
+  {
+    "id": "luvas-nitrilicas",
+    "name": "Luvas nitrílicas sem pó",
+    "category": "Descartáveis",
+    "pack": "Caixa com 100 unidades",
+    "description": "Indicadas para procedimentos, limpeza técnica e rotina de clínicas.",
+    "price": 39.9,
+    "stock": 20,
+    "active": true,
+    "image": "assets/produto-luvas.png"
+  },
+  {
+    "id": "mascara-cirurgica",
+    "name": "Máscara cirúrgica tripla",
+    "category": "Proteção",
+    "pack": "Caixa com 50 unidades",
+    "description": "Camada tripla com elástico, para proteção em ambientes de cuidado.",
+    "price": 18.9,
+    "stock": 35,
+    "active": true,
+    "image": "assets/produto-mascara.png"
+  },
+  {
+    "id": "alcool-70",
+    "name": "Álcool 70% líquido",
+    "category": "Higiene",
+    "pack": "Frasco 1 litro",
+    "description": "Uso para higienização de superfícies conforme orientação do fabricante.",
+    "price": 12.9,
+    "stock": 28,
+    "active": true,
+    "image": "assets/produto-alcool.png"
+  },
+  {
+    "id": "gaze-esteril",
+    "name": "Gaze estéril",
+    "category": "Curativos",
+    "pack": "Pacote com 10 unidades",
+    "description": "Compressas para curativos, absorção e proteção da área tratada.",
+    "price": 6.9,
+    "stock": 50,
+    "active": true,
+    "image": "assets/produto-gaze.png"
+  },
+  {
+    "id": "esparadrapo",
+    "name": "Esparadrapo impermeável",
+    "category": "Curativos",
+    "pack": "Rolo 10 cm x 4,5 m",
+    "description": "Fixação de curativos, gazes e dispositivos de uso externo.",
+    "price": 14.9,
+    "stock": 24,
+    "active": true,
+    "image": "assets/produto-esparadrapo.png"
+  },
+  {
+    "id": "curativo-adesivo",
+    "name": "Curativo adesivo",
+    "category": "Curativos",
+    "pack": "Caixa com 35 unidades",
+    "description": "Prático para pequenos cuidados, com almofada absorvente central.",
+    "price": 9.9,
+    "stock": 40,
+    "active": true,
+    "image": "assets/produto-curativo.png"
+  },
+  {
+    "id": "seringa-descartavel",
+    "name": "Seringa descartável 5 ml",
+    "category": "Procedimentos",
+    "pack": "Unidade estéril",
+    "description": "Produto de uso profissional. Confirme indicação e regularização.",
+    "price": 1.2,
+    "stock": 200,
+    "active": true,
+    "image": "assets/produto-seringa.png"
+  },
+  {
+    "id": "avental-descartavel",
+    "name": "Avental descartável",
+    "category": "Proteção",
+    "pack": "Pacote com 10 unidades",
+    "description": "Barreira de proteção para atendimento, limpeza e procedimentos simples.",
+    "price": 24.9,
+    "stock": 18,
+    "active": true,
+    "image": "assets/produto-avental.png"
+  },
+  {
+    "id": "touca-descartavel",
+    "name": "Touca descartável sanfonada",
+    "category": "Proteção",
+    "pack": "Pacote com 100 unidades",
+    "description": "Indicada para higiene, contenção de cabelo e rotina operacional.",
+    "price": 16.9,
+    "stock": 30,
+    "active": true,
+    "image": "assets/produto-touca.png"
+  },
+  {
+    "id": "termometro-digital",
+    "name": "Termômetro digital",
+    "category": "Equipamentos",
+    "pack": "Unidade",
+    "description": "Medição de temperatura corporal com leitura rápida e visor digital.",
+    "price": 29.9,
+    "stock": 14,
+    "active": true,
+    "image": "assets/produto-termometro.png"
+  }
+]
