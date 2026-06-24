@@ -4,6 +4,34 @@
     "api/[...path].js": {
       "maxDuration": 10,
       "includeFiles": "data/**"
+    },
+    "api/admin/login.js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    },
+    "api/admin/logout.js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    },
+    "api/admin/session.js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    },
+    "api/admin/products.js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    },
+    "api/admin/products/[id].js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    },
+    "api/admin/orders.js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
+    },
+    "api/admin/orders/[id].js": {
+      "maxDuration": 10,
+      "includeFiles": "data/**"
     }
   }
 }
