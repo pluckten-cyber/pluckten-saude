@@ -267,15 +267,24 @@ function normalizeProduct(input, existingId) {
   const price = Number(input.price);
   if (!Number.isFinite(price) || price < 0) throw new Error("Preço inválido.");
 
+  const availability = ["in_stock", "on_request", "unavailable"].includes(input.availability)
+    ? input.availability
+    : "in_stock";
   const baseId = existingId || input.id || name;
   return {
     id: slugify(baseId) || crypto.randomUUID(),
     name,
     category: String(input.category || "Geral").trim(),
     pack: String(input.pack || "Unidade").trim(),
+    brand: String(input.brand || "").trim(),
+    sku: String(input.sku || "").trim(),
     description: String(input.description || "").trim(),
     price,
     stock: Math.max(0, Number(input.stock || 0)),
+    anvisa: String(input.anvisa || "").trim(),
+    availability,
+    batch: String(input.batch || "").trim(),
+    validity: String(input.validity || "").trim(),
     active: Boolean(input.active),
     image: String(input.image || "assets/hero-kit.png").trim(),
   };

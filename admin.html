@@ -58,6 +58,10 @@
               <span data-stat-open>0</span>
               <strong>em aberto</strong>
             </article>
+            <article>
+              <span data-stat-revenue>R$ 0</span>
+              <strong>em pedidos</strong>
+            </article>
           </div>
         </section>
 
@@ -69,6 +73,24 @@
                 <h2>Vendas e prazos</h2>
               </div>
               <button class="button ghost" type="button" data-refresh>Atualizar</button>
+            </div>
+            <div class="admin-toolbar">
+              <label class="admin-field">
+                Buscar pedido
+                <input type="search" placeholder="Cliente, telefone ou código" data-order-search>
+              </label>
+              <label class="admin-field">
+                Status
+                <select data-order-filter>
+                  <option value="">Todos</option>
+                  <option value="novo">Novo</option>
+                  <option value="confirmado">Confirmado</option>
+                  <option value="separando">Separando</option>
+                  <option value="enviado">Enviado</option>
+                  <option value="entregue">Entregue</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </label>
             </div>
             <div class="order-list" data-order-list></div>
           </section>
@@ -98,6 +120,16 @@
                   <input name="pack" required>
                 </label>
               </div>
+              <div class="form-row">
+                <label class="admin-field">
+                  Marca / fabricante
+                  <input name="brand" placeholder="Ex.: Descarpack, Medix">
+                </label>
+                <label class="admin-field">
+                  SKU interno
+                  <input name="sku" placeholder="Ex.: PLK-LUV-001">
+                </label>
+              </div>
               <label class="admin-field">
                 Descrição
                 <textarea name="description" rows="3" required></textarea>
@@ -112,6 +144,30 @@
                   <input name="stock" type="number" min="0" step="1" required>
                 </label>
               </div>
+              <div class="form-row">
+                <label class="admin-field">
+                  Regularização / ANVISA
+                  <input name="anvisa" placeholder="Ex.: Isento ou nº do registro">
+                </label>
+                <label class="admin-field">
+                  Disponibilidade
+                  <select name="availability">
+                    <option value="in_stock">Pronta entrega</option>
+                    <option value="on_request">Sob consulta</option>
+                    <option value="unavailable">Indisponível</option>
+                  </select>
+                </label>
+              </div>
+              <div class="form-row">
+                <label class="admin-field">
+                  Lote
+                  <input name="batch" placeholder="Opcional">
+                </label>
+                <label class="admin-field">
+                  Validade
+                  <input name="validity" type="date">
+                </label>
+              </div>
               <label class="admin-field">
                 URL da foto
                 <input name="image" placeholder="assets/produto.png ou https://...">
@@ -120,6 +176,7 @@
                 Enviar foto do computador
                 <input name="imageFile" type="file" accept="image/*">
               </label>
+              <div class="image-preview" data-image-preview hidden></div>
               <label class="switch-field">
                 <input name="active" type="checkbox" checked>
                 Produto ativo na loja

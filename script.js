@@ -1,13 +1,31 @@
 const WHATSAPP_NUMBER = "5599999999999";
 
 let products = [];
+let selectedProductId = "";
 const cart = new Map();
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
 
+const availabilityLabels = {
+  in_stock: "Pronta entrega",
+  on_request: "Sob consulta",
+  unavailable: "Indisponível",
+};
+
 const productGrid = document.querySelector("[data-product-grid]");
+const productSearch = document.querySelector("[data-product-search]");
+const categoryFilter = document.querySelector("[data-category-filter]");
+const clearFiltersButton = document.querySelector("[data-clear-filters]");
+const productModal = document.querySelector("[data-product-modal]");
+const detailImage = document.querySelector("[data-detail-image]");
+const detailCategory = document.querySelector("[data-detail-category]");
+const detailName = document.querySelector("[data-detail-name]");
+const detailDescription = document.querySelector("[data-detail-description]");
+const detailGrid = document.querySelector("[data-detail-grid]");
+const detailPrice = document.querySelector("[data-detail-price]");
+const detailAdd = document.querySelector("[data-detail-add]");
 const cartPanel = document.querySelector("[data-cart-panel]");
 const cartItems = document.querySelector("[data-cart-items]");
 const cartEmpty = document.querySelector("[data-cart-empty]");
@@ -19,8 +37,33 @@ const checkoutModal = document.querySelector("[data-checkout-modal]");
 const checkoutForm = document.querySelector("[data-checkout-form]");
 const checkoutStatus = document.querySelector("[data-checkout-status]");
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function formatPrice(value) {
-  return currency.format(value);
+  return currency.format(Number(value || 0));
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const [year, month, day] = String(value).split("-");
+  if (!year || !month || !day) return value;
+  return `${day}/${month}/${year}`;
+}
+
+function getAvailability(product) {
+  return availabilityLabels[product.availability] ? product.availability : "in_stock";
+}
+
+function availabilityBadge(product) {
+  const availability = getAvailability(product);
+  return `<span class="stock-badge ${availability}">${availabilityLabels[availability]}</span>`;
 }
 
 function getWhatsAppUrl(message) {
@@ -39,6 +82,7 @@ async function loadProducts() {
     if (!response.ok) throw new Error("Não foi possível carregar os produtos.");
     const data = await response.json();
     products = data.products || [];
+    renderFilters();
     renderProducts();
     renderCart();
   } catch (error) {
@@ -51,7 +95,41 @@ async function loadProducts() {
   }
 }
 
+function renderFilters() {
+  const currentCategory = categoryFilter.value;
+  const categories = [...new Set(products.map((product) => product.category).filter(Boolean))].sort();
+  categoryFilter.innerHTML = `
+    <option value="">Todas as categorias</option>
+    ${categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("")}
+  `;
+  categoryFilter.value = categories.includes(currentCategory) ? currentCategory : "";
+}
+
+function filteredProducts() {
+  const query = productSearch.value.trim().toLowerCase();
+  const category = categoryFilter.value;
+
+  return products.filter((product) => {
+    const searchable = [
+      product.name,
+      product.description,
+      product.category,
+      product.brand,
+      product.sku,
+      product.anvisa,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    const matchesQuery = !query || searchable.includes(query);
+    const matchesCategory = !category || product.category === category;
+    return matchesQuery && matchesCategory;
+  });
+}
+
 function renderProducts() {
+  const visibleProducts = filteredProducts();
+
   if (products.length === 0) {
     productGrid.innerHTML = `
       <div class="empty-state">
@@ -62,32 +140,107 @@ function renderProducts() {
     return;
   }
 
-  productGrid.innerHTML = products
-    .map(
-      (product, index) => `
+  if (visibleProducts.length === 0) {
+    productGrid.innerHTML = `
+      <div class="empty-state">
+        <strong>Nenhum produto encontrado.</strong>
+        <p>Tente outra busca ou limpe os filtros para ver todo o catálogo.</p>
+      </div>
+    `;
+    return;
+  }
+
+  productGrid.innerHTML = visibleProducts
+    .map((product, index) => {
+      const availability = getAvailability(product);
+      const code = product.sku || `PLK-${String(index + 1).padStart(2, "0")}`;
+      const disabled = availability === "unavailable" ? "disabled" : "";
+      const stockText =
+        availability === "on_request" ? "estoque sob consulta" : `estoque: ${Number(product.stock || 0)}`;
+
+      return `
         <article class="product-card">
           <div class="product-image-shell">
-            <img class="product-image" src="${product.image}" alt="${product.name}">
+            <img class="product-image" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </div>
           <div class="product-body">
             <div class="product-meta">
-              <span class="tag">${product.category}</span>
-              <span class="product-code">PLK-${String(index + 1).padStart(2, "0")}</span>
+              <span class="tag">${escapeHtml(product.category)}</span>
+              <span class="product-code">${escapeHtml(code)}</span>
             </div>
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <span class="product-code">${product.pack} • estoque: ${product.stock ?? 0}</span>
+            <h3>${escapeHtml(product.name)}</h3>
+            <p>${escapeHtml(product.description)}</p>
+            <div class="product-badges">
+              ${availabilityBadge(product)}
+              ${product.brand ? `<span class="product-code">${escapeHtml(product.brand)}</span>` : ""}
+              <span class="product-code">${escapeHtml(product.pack)} • ${escapeHtml(stockText)}</span>
+            </div>
             <div class="product-footer">
               <span class="price">${formatPrice(product.price)}</span>
-              <button class="add-button" type="button" data-add-product="${product.id}">
-                Adicionar
-              </button>
+              <div class="product-actions">
+                <button class="mini-button" type="button" data-view-product="${escapeHtml(product.id)}">
+                  Detalhes
+                </button>
+                <button class="add-button" type="button" data-add-product="${escapeHtml(product.id)}" ${disabled}>
+                  ${availability === "on_request" ? "Consultar" : "Adicionar"}
+                </button>
+              </div>
             </div>
           </div>
         </article>
+      `;
+    })
+    .join("");
+}
+
+function productDetails(product) {
+  return [
+    ["Marca", product.brand],
+    ["SKU", product.sku],
+    ["Embalagem", product.pack],
+    ["Regularização / ANVISA", product.anvisa],
+    ["Lote", product.batch],
+    ["Validade", formatDate(product.validity)],
+    ["Disponibilidade", availabilityLabels[getAvailability(product)]],
+    ["Estoque", getAvailability(product) === "on_request" ? "Sob consulta" : Number(product.stock || 0)],
+  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+}
+
+function openProductDetails(id) {
+  const product = products.find((item) => item.id === id);
+  if (!product) return;
+
+  selectedProductId = id;
+  detailImage.src = product.image;
+  detailImage.alt = product.name;
+  detailCategory.textContent = product.category || "Produto";
+  detailName.textContent = product.name;
+  detailDescription.textContent = product.description || "";
+  detailPrice.textContent = formatPrice(product.price);
+  detailGrid.innerHTML = productDetails(product)
+    .map(
+      ([label, value]) => `
+        <div>
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(value)}</dd>
+        </div>
       `,
     )
     .join("");
+  detailAdd.disabled = getAvailability(product) === "unavailable";
+  detailAdd.textContent = getAvailability(product) === "on_request" ? "Consultar" : "Adicionar";
+
+  productModal.classList.add("is-open");
+  productModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("cart-open");
+}
+
+function closeProductDetails() {
+  productModal.classList.remove("is-open");
+  productModal.setAttribute("aria-hidden", "true");
+  if (!cartPanel.classList.contains("is-open") && !checkoutModal.classList.contains("is-open")) {
+    document.body.classList.remove("cart-open");
+  }
 }
 
 function getCartSummary() {
@@ -117,13 +270,13 @@ function renderCart() {
       return `
         <article class="cart-row">
           <div>
-            <h3>${product.name}</h3>
+            <h3>${escapeHtml(product.name)}</h3>
             <p>${formatPrice(product.price)} cada</p>
           </div>
-          <div class="qty-control" aria-label="Quantidade de ${product.name}">
-            <button type="button" data-decrease="${id}" aria-label="Diminuir">−</button>
+          <div class="qty-control" aria-label="Quantidade de ${escapeHtml(product.name)}">
+            <button type="button" data-decrease="${escapeHtml(id)}" aria-label="Diminuir">−</button>
             <span>${quantity}</span>
-            <button type="button" data-increase="${id}" aria-label="Aumentar">+</button>
+            <button type="button" data-increase="${escapeHtml(id)}" aria-label="Aumentar">+</button>
           </div>
         </article>
       `;
@@ -139,6 +292,8 @@ function renderCart() {
 }
 
 function addToCart(id) {
+  const product = products.find((item) => item.id === id);
+  if (!product || getAvailability(product) === "unavailable") return;
   cart.set(id, (cart.get(id) || 0) + 1);
   renderCart();
 }
@@ -164,7 +319,9 @@ function openCart() {
 function closeCart() {
   cartPanel.classList.remove("is-open");
   cartPanel.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("cart-open");
+  if (!checkoutModal.classList.contains("is-open") && !productModal.classList.contains("is-open")) {
+    document.body.classList.remove("cart-open");
+  }
 }
 
 function openCheckout() {
@@ -179,7 +336,7 @@ function openCheckout() {
 function closeCheckout() {
   checkoutModal.classList.remove("is-open");
   checkoutModal.setAttribute("aria-hidden", "true");
-  if (!cartPanel.classList.contains("is-open")) {
+  if (!cartPanel.classList.contains("is-open") && !productModal.classList.contains("is-open")) {
     document.body.classList.remove("cart-open");
   }
 }
@@ -222,11 +379,22 @@ async function submitOrder(event) {
 
 document.addEventListener("click", (event) => {
   const addButton = event.target.closest("[data-add-product]");
+  const viewButton = event.target.closest("[data-view-product]");
   const increaseButton = event.target.closest("[data-increase]");
   const decreaseButton = event.target.closest("[data-decrease]");
 
   if (addButton) {
     addToCart(addButton.dataset.addProduct);
+    if (!addButton.disabled) openCart();
+  }
+
+  if (viewButton) {
+    openProductDetails(viewButton.dataset.viewProduct);
+  }
+
+  if (event.target.closest("[data-detail-add]")) {
+    addToCart(selectedProductId);
+    closeProductDetails();
     openCart();
   }
 
@@ -236,6 +404,16 @@ document.addEventListener("click", (event) => {
 
   if (decreaseButton) {
     updateQuantity(decreaseButton.dataset.decrease, -1);
+  }
+
+  if (event.target.closest("[data-clear-filters]")) {
+    productSearch.value = "";
+    categoryFilter.value = "";
+    renderProducts();
+  }
+
+  if (event.target.closest("[data-product-modal-close]")) {
+    closeProductDetails();
   }
 
   if (event.target.closest("[data-cart-open]")) {
@@ -257,11 +435,15 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    closeProductDetails();
     closeCheckout();
     closeCart();
   }
 });
 
+productSearch.addEventListener("input", renderProducts);
+categoryFilter.addEventListener("change", renderProducts);
+clearFiltersButton.addEventListener("click", renderProducts);
 checkoutForm.addEventListener("submit", submitOrder);
 setContactLinks();
 loadProducts();

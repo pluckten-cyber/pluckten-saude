@@ -25,6 +25,7 @@
       <nav class="nav" aria-label="Principal">
         <a href="#produtos">Catálogo</a>
         <a href="#confianca">Como vendemos</a>
+        <a href="#orientacoes">Orientações</a>
         <a href="#contato">Contato</a>
       </nav>
 
@@ -89,6 +90,20 @@
           </p>
         </div>
 
+        <div class="catalog-tools" aria-label="Filtros do catálogo">
+          <label>
+            Buscar produto
+            <input type="search" placeholder="Ex.: luva, gaze, termômetro" data-product-search>
+          </label>
+          <label>
+            Categoria
+            <select data-category-filter>
+              <option value="">Todas as categorias</option>
+            </select>
+          </label>
+          <button class="mini-button" type="button" data-clear-filters>Limpar</button>
+        </div>
+
         <div class="product-grid" data-product-grid></div>
       </section>
 
@@ -121,6 +136,27 @@
         </div>
       </section>
 
+      <section class="guidance-section" id="orientacoes">
+        <div>
+          <p class="eyebrow">Compra orientada</p>
+          <h2>Informações claras antes de fechar o pedido.</h2>
+        </div>
+        <div class="guidance-grid">
+          <article>
+            <strong>Produtos regularizados</strong>
+            <p>Quando aplicável, informe registro, validade, lote e fabricante antes da venda.</p>
+          </article>
+          <article>
+            <strong>Trocas e divergências</strong>
+            <p>Pedidos são conferidos no atendimento. Trocas dependem da embalagem e condição do item.</p>
+          </article>
+          <article>
+            <strong>Privacidade</strong>
+            <p>Os dados enviados são usados apenas para cotar, confirmar e acompanhar o pedido.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="contact" id="contato">
         <div>
           <p class="eyebrow">Atendimento Pluckten</p>
@@ -135,6 +171,26 @@
         </a>
       </section>
     </main>
+
+    <aside class="product-modal" data-product-modal aria-hidden="true">
+      <div class="product-modal-backdrop" data-product-modal-close></div>
+      <section class="product-detail-card" aria-label="Detalhes do produto">
+        <button class="icon-button detail-close" type="button" data-product-modal-close aria-label="Fechar detalhes">×</button>
+        <div class="detail-image-shell">
+          <img data-detail-image alt="">
+        </div>
+        <div class="detail-copy">
+          <span class="tag" data-detail-category></span>
+          <h2 data-detail-name></h2>
+          <p data-detail-description></p>
+          <dl class="detail-grid" data-detail-grid></dl>
+          <div class="product-footer">
+            <span class="price" data-detail-price></span>
+            <button class="add-button" type="button" data-detail-add>Adicionar</button>
+          </div>
+        </div>
+      </section>
+    </aside>
 
     <aside class="cart-panel" data-cart-panel aria-hidden="true">
       <div class="cart-backdrop" data-cart-close></div>

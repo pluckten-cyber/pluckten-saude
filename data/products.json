@@ -8,7 +8,13 @@
     "price": 39.9,
     "stock": 20,
     "active": true,
-    "image": "assets/produto-luvas.png"
+    "image": "assets/produto-luvas.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-LUV-001",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "LUV-2026A",
+    "validity": "2028-02-28"
   },
   {
     "id": "mascara-cirurgica",
@@ -19,7 +25,13 @@
     "price": 18.9,
     "stock": 35,
     "active": true,
-    "image": "assets/produto-mascara.png"
+    "image": "assets/produto-mascara.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-MAS-002",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "MAS-2026A",
+    "validity": "2028-01-31"
   },
   {
     "id": "alcool-70",
@@ -30,7 +42,13 @@
     "price": 12.9,
     "stock": 28,
     "active": true,
-    "image": "assets/produto-alcool.png"
+    "image": "assets/produto-alcool.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-ALC-003",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "ALC-2026A",
+    "validity": "2027-12-31"
   },
   {
     "id": "gaze-esteril",
@@ -41,7 +59,13 @@
     "price": 6.9,
     "stock": 50,
     "active": true,
-    "image": "assets/produto-gaze.png"
+    "image": "assets/produto-gaze.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-GAZ-004",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "GAZ-2026A",
+    "validity": "2029-03-31"
   },
   {
     "id": "esparadrapo",
@@ -52,7 +76,13 @@
     "price": 14.9,
     "stock": 24,
     "active": true,
-    "image": "assets/produto-esparadrapo.png"
+    "image": "assets/produto-esparadrapo.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-ESP-005",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "ESP-2026A",
+    "validity": "2028-09-30"
   },
   {
     "id": "curativo-adesivo",
@@ -63,7 +93,13 @@
     "price": 9.9,
     "stock": 40,
     "active": true,
-    "image": "assets/produto-curativo.png"
+    "image": "assets/produto-curativo.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-CUR-006",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "CUR-2026A",
+    "validity": "2028-11-30"
   },
   {
     "id": "seringa-descartavel",
@@ -74,7 +110,13 @@
     "price": 1.2,
     "stock": 200,
     "active": true,
-    "image": "assets/produto-seringa.png"
+    "image": "assets/produto-seringa.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-SER-007",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "on_request",
+    "batch": "SER-2026A",
+    "validity": "2029-06-30"
   },
   {
     "id": "avental-descartavel",
@@ -85,7 +127,13 @@
     "price": 24.9,
     "stock": 18,
     "active": true,
-    "image": "assets/produto-avental.png"
+    "image": "assets/produto-avental.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-AVE-008",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "AVE-2026A",
+    "validity": "2028-05-31"
   },
   {
     "id": "touca-descartavel",
@@ -96,7 +144,13 @@
     "price": 16.9,
     "stock": 30,
     "active": true,
-    "image": "assets/produto-touca.png"
+    "image": "assets/produto-touca.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-TOU-009",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "TOU-2026A",
+    "validity": "2028-07-31"
   },
   {
     "id": "termometro-digital",
@@ -107,6 +161,12 @@
     "price": 29.9,
     "stock": 14,
     "active": true,
-    "image": "assets/produto-termometro.png"
+    "image": "assets/produto-termometro.png",
+    "brand": "Pluckten Select",
+    "sku": "PLK-TER-010",
+    "anvisa": "Consultar regularização do fornecedor",
+    "availability": "in_stock",
+    "batch": "TER-2026A",
+    "validity": "2028-12-31"
   }
 ]
