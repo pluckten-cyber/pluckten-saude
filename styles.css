@@ -225,6 +225,26 @@ p {
   font-size: 1.08rem;
 }
 
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.hero-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(238, 249, 248, 0.62);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .hero-actions,
 .contact {
   display: flex;
@@ -235,6 +255,34 @@ p {
 
 .hero-actions {
   margin-top: 32px;
+}
+
+.hero-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.hero-steps article {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(232, 247, 247, 0.62);
+}
+
+.hero-steps strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.hero-steps span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .button {
@@ -349,6 +397,13 @@ p {
   margin-top: 4px;
   font-size: 1.25rem;
   color: #e9fbfb;
+}
+
+.stage-card p {
+  margin: 8px 0 0;
+  color: rgba(233, 251, 251, 0.72);
+  font-size: 0.86rem;
+  line-height: 1.55;
 }
 
 .stage-card span {
@@ -1131,6 +1186,7 @@ p {
   .guidance-section,
   .guidance-grid,
   .checkout-row,
+  .hero-steps,
   .product-grid {
     grid-template-columns: 1fr;
   }
