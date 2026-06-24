@@ -8,7 +8,7 @@
     "check": "node --check server.js && node --check server-core.js && node --check script.js && node --check admin.js"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4"
+    "@supabase/supabase-js": "^2.46.1"
   },
   "engines": {
     "node": ">=20"

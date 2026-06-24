@@ -1,58 +1,87 @@
-# Deploy da Pluckten Saúde na Vercel
+# Deploy da Pluckten Saúde com Vercel + Supabase
 
-Este projeto está pronto para rodar na Vercel com:
+Este projeto roda com:
 
 - site público estático;
 - APIs em `api/[...path].js`;
 - painel admin em `/admin.html`;
-- banco Postgres/Neon em produção via `DATABASE_URL`;
-- JSON local para desenvolvimento no computador.
+- Supabase Database para produtos e pedidos;
+- Supabase Storage para fotos de produtos;
+- JSON local para desenvolvimento sem Supabase.
 
-## 1. Criar o projeto na Vercel
+## 1. Criar o projeto no Supabase
 
-1. Crie uma conta em https://vercel.com.
-2. Suba este projeto para um repositório GitHub.
-3. Na Vercel, clique em `Add New > Project`.
-4. Importe o repositório.
-5. Framework Preset: `Other`.
-6. Build Command: deixe vazio.
-7. Output Directory: deixe vazio.
+1. Acesse https://supabase.com.
+2. Crie um projeto chamado `pluckten-saude`.
+3. Guarde a senha do banco.
 
-## 2. Criar o banco
+## 2. Criar tabelas e bucket
 
-No painel da Vercel, conecte um banco Postgres pelo Marketplace, como Neon.
+No Supabase:
 
-Depois configure a variável:
+1. Vá em `SQL Editor`.
+2. Cole o conteúdo do arquivo `supabase-schema.sql`.
+3. Clique em `Run`.
+
+Isso cria:
+
+- tabela `products`;
+- tabela `orders`;
+- bucket público `product-images`.
+
+## 3. Pegar chaves do Supabase
+
+No Supabase:
+
+1. Vá em `Project Settings > API`.
+2. Copie `Project URL`.
+3. Copie a chave `service_role`.
+
+Importante: a chave `service_role` deve ficar somente na Vercel, nunca em código de navegador.
+
+## 4. Configurar variáveis na Vercel
+
+No projeto da Vercel, vá em:
 
 ```text
-DATABASE_URL=postgres://...
+Settings > Environment Variables
 ```
 
-Na primeira execução, o sistema cria as tabelas e copia os produtos iniciais de
-`data/products.json` para o banco.
-
-## 3. Configurar senha admin
-
-Configure também:
+Crie:
 
 ```text
-PLUCKTEN_ADMIN_PASSWORD=uma-senha-forte-aqui
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+SUPABASE_STORAGE_BUCKET=product-images
+PLUCKTEN_ADMIN_PASSWORD=uma-senha-forte
 ```
 
-Sem essa variável, a senha padrão será `pluckten123`, o que não deve ser usado em produção.
+`SUPABASE_STORAGE_BUCKET` é opcional se você usar o nome padrão `product-images`.
 
-## 4. Publicar
+## 5. Deploy na Vercel
 
-Depois de configurar as variáveis, faça o deploy pela própria Vercel.
+Configuração recomendada:
 
-URLs principais:
+```text
+Framework Preset: Other
+Build Command: vazio
+Output Directory: vazio
+Install Command: npm install
+Root Directory: ./
+```
+
+Depois clique em `Deploy`.
+
+## 6. Acessar
 
 ```text
 https://seu-dominio.vercel.app/
 https://seu-dominio.vercel.app/admin.html
 ```
 
-## 5. Rodar localmente
+## 7. Rodar localmente
+
+Sem Supabase, o projeto usa os arquivos `data/products.json` e `data/orders.json`.
 
 ```powershell
 npm install

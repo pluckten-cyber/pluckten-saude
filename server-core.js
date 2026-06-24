@@ -10,21 +10,27 @@ const MAX_BODY_SIZE = 8 * 1024 * 1024;
 const ADMIN_PASSWORD = process.env.PLUCKTEN_ADMIN_PASSWORD || "pluckten123";
 const COOKIE_NAME = "pluckten_session";
 const SESSION_MAX_AGE = 60 * 60 * 24;
+const SUPABASE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "product-images";
 
-let neonSql;
-let dbReady;
+let supabaseClient;
+let seedReady;
 
-function hasDatabase() {
-  return Boolean(process.env.DATABASE_URL);
+function hasSupabase() {
+  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-async function getSql() {
-  if (!hasDatabase()) return null;
-  if (!neonSql) {
-    const { neon } = await import("@neondatabase/serverless");
-    neonSql = neon(process.env.DATABASE_URL);
+async function getSupabase() {
+  if (!hasSupabase()) return null;
+  if (!supabaseClient) {
+    const { createClient } = await import("@supabase/supabase-js");
+    supabaseClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
   }
-  return neonSql;
+  return supabaseClient;
 }
 
 function readJson(file, fallback) {
@@ -40,49 +46,42 @@ function writeJson(file, value) {
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
-async function ensureDb() {
-  if (!hasDatabase()) return;
-  if (!dbReady) {
-    dbReady = (async () => {
-      const sql = await getSql();
-      await sql`
-        create table if not exists products (
-          id text primary key,
-          data jsonb not null,
-          updated_at timestamptz not null default now()
-        )
-      `;
-      await sql`
-        create table if not exists orders (
-          id text primary key,
-          data jsonb not null,
-          created_at timestamptz not null default now(),
-          updated_at timestamptz not null default now()
-        )
-      `;
+async function ensureSupabaseSeed() {
+  if (!hasSupabase()) return;
+  if (!seedReady) {
+    seedReady = (async () => {
+      const supabase = await getSupabase();
+      const { count, error } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true });
 
-      const count = await sql`select count(*)::int as count from products`;
-      if (count[0].count === 0) {
-        const seedProducts = readJson(PRODUCTS_FILE, []);
-        for (const product of seedProducts) {
-          await sql`
-            insert into products (id, data, updated_at)
-            values (${product.id}, ${JSON.stringify(product)}, now())
-            on conflict (id) do nothing
-          `;
-        }
+      if (error) throw new Error(`Supabase products: ${error.message}`);
+      if (count && count > 0) return;
+
+      const seedProducts = readJson(PRODUCTS_FILE, []);
+      for (const product of seedProducts) {
+        const { error: insertError } = await supabase.from("products").upsert({
+          id: product.id,
+          data: product,
+          updated_at: new Date().toISOString(),
+        });
+        if (insertError) throw new Error(`Supabase seed: ${insertError.message}`);
       }
     })();
   }
-  await dbReady;
+  await seedReady;
 }
 
 async function listProducts({ includeInactive = false } = {}) {
-  if (hasDatabase()) {
-    await ensureDb();
-    const sql = await getSql();
-    const rows = await sql`select data from products order by updated_at desc`;
-    const products = rows.map((row) => row.data);
+  if (hasSupabase()) {
+    await ensureSupabaseSeed();
+    const supabase = await getSupabase();
+    const { data, error } = await supabase
+      .from("products")
+      .select("data")
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(`Supabase products: ${error.message}`);
+    const products = data.map((row) => row.data);
     return includeInactive ? products : products.filter((product) => product.active !== false);
   }
 
@@ -91,15 +90,17 @@ async function listProducts({ includeInactive = false } = {}) {
 }
 
 async function saveProduct(product) {
-  if (hasDatabase()) {
-    await ensureDb();
-    const sql = await getSql();
-    await sql`
-      insert into products (id, data, updated_at)
-      values (${product.id}, ${JSON.stringify(product)}, now())
-      on conflict (id) do update set data = excluded.data, updated_at = now()
-    `;
-    return product;
+  if (hasSupabase()) {
+    await ensureSupabaseSeed();
+    const supabase = await getSupabase();
+    const productToSave = await uploadProductImage(product);
+    const { error } = await supabase.from("products").upsert({
+      id: productToSave.id,
+      data: productToSave,
+      updated_at: new Date().toISOString(),
+    });
+    if (error) throw new Error(`Supabase save product: ${error.message}`);
+    return productToSave;
   }
 
   const products = readJson(PRODUCTS_FILE, []);
@@ -114,10 +115,11 @@ async function saveProduct(product) {
 }
 
 async function removeProduct(id) {
-  if (hasDatabase()) {
-    await ensureDb();
-    const sql = await getSql();
-    await sql`delete from products where id = ${id}`;
+  if (hasSupabase()) {
+    await ensureSupabaseSeed();
+    const supabase = await getSupabase();
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) throw new Error(`Supabase delete product: ${error.message}`);
     return;
   }
 
@@ -128,25 +130,31 @@ async function removeProduct(id) {
 }
 
 async function listOrders() {
-  if (hasDatabase()) {
-    await ensureDb();
-    const sql = await getSql();
-    const rows = await sql`select data from orders order by created_at desc`;
-    return rows.map((row) => row.data);
+  if (hasSupabase()) {
+    await ensureSupabaseSeed();
+    const supabase = await getSupabase();
+    const { data, error } = await supabase
+      .from("orders")
+      .select("data")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(`Supabase orders: ${error.message}`);
+    return data.map((row) => row.data);
   }
 
   return readJson(ORDERS_FILE, []);
 }
 
 async function saveOrder(order) {
-  if (hasDatabase()) {
-    await ensureDb();
-    const sql = await getSql();
-    await sql`
-      insert into orders (id, data, created_at, updated_at)
-      values (${order.id}, ${JSON.stringify(order)}, ${order.createdAt}, ${order.updatedAt})
-      on conflict (id) do update set data = excluded.data, updated_at = now()
-    `;
+  if (hasSupabase()) {
+    await ensureSupabaseSeed();
+    const supabase = await getSupabase();
+    const { error } = await supabase.from("orders").upsert({
+      id: order.id,
+      data: order,
+      created_at: order.createdAt,
+      updated_at: order.updatedAt,
+    });
+    if (error) throw new Error(`Supabase save order: ${error.message}`);
     return order;
   }
 
@@ -270,6 +278,47 @@ function normalizeProduct(input, existingId) {
     stock: Math.max(0, Number(input.stock || 0)),
     active: Boolean(input.active),
     image: String(input.image || "assets/hero-kit.png").trim(),
+  };
+}
+
+function parseDataUrl(value) {
+  const match = String(value || "").match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) return null;
+
+  return {
+    mimeType: match[1],
+    buffer: Buffer.from(match[2], "base64"),
+  };
+}
+
+function extensionFromMime(mimeType) {
+  const normalized = String(mimeType || "").toLowerCase();
+  if (normalized.includes("png")) return "png";
+  if (normalized.includes("webp")) return "webp";
+  if (normalized.includes("gif")) return "gif";
+  return "jpg";
+}
+
+async function uploadProductImage(product) {
+  const parsed = parseDataUrl(product.image);
+  if (!parsed) return product;
+
+  const supabase = await getSupabase();
+  const extension = extensionFromMime(parsed.mimeType);
+  const filePath = `products/${product.id}-${Date.now()}.${extension}`;
+  const { error: uploadError } = await supabase.storage
+    .from(SUPABASE_BUCKET)
+    .upload(filePath, parsed.buffer, {
+      contentType: parsed.mimeType,
+      upsert: true,
+    });
+
+  if (uploadError) throw new Error(`Supabase upload: ${uploadError.message}`);
+
+  const { data } = supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(filePath);
+  return {
+    ...product,
+    image: data.publicUrl,
   };
 }
 
