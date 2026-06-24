@@ -15,8 +15,8 @@
   border: 1px solid var(--line);
   border-radius: 28px;
   background:
-    radial-gradient(circle at top right, rgba(139, 226, 242, 0.24), transparent 18rem),
-    rgba(255, 255, 255, 0.88);
+    radial-gradient(circle at top right, rgba(121, 215, 234, 0.26), transparent 18rem),
+    rgba(232, 247, 247, 0.88);
   box-shadow: var(--shadow);
 }
 
@@ -64,8 +64,8 @@
   border: 1px solid var(--line);
   border-radius: 28px;
   background:
-    radial-gradient(circle at 20% 20%, rgba(204, 239, 165, 0.28), transparent 20rem),
-    rgba(255, 255, 255, 0.8);
+    radial-gradient(circle at 20% 20%, rgba(189, 230, 142, 0.32), transparent 20rem),
+    rgba(232, 247, 247, 0.82);
 }
 
 .stats-grid {
@@ -78,7 +78,7 @@
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(238, 249, 248, 0.78);
 }
 
 .stats-grid span {
@@ -104,7 +104,7 @@
   padding: clamp(18px, 3vw, 24px);
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(232, 247, 247, 0.84);
 }
 
 .panel-head {
@@ -168,7 +168,7 @@
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.74);
+  background: rgba(238, 249, 248, 0.78);
 }
 
 .order-head,
@@ -227,7 +227,7 @@
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(238, 249, 248, 0.82);
   color: var(--text);
   cursor: pointer;
   font-weight: 900;

@@ -1,18 +1,18 @@
 :root {
   color-scheme: light;
-  --bg: #f7fcfd;
-  --bg-2: #eef9f8;
-  --panel: rgba(255, 255, 255, 0.86);
-  --panel-solid: #ffffff;
-  --panel-soft: #f0faf9;
-  --line: rgba(30, 123, 145, 0.16);
-  --line-strong: rgba(30, 123, 145, 0.3);
+  --bg: #dceff2;
+  --bg-2: #e5f5ef;
+  --panel: rgba(232, 247, 247, 0.88);
+  --panel-solid: #edf8f7;
+  --panel-soft: #d8eff0;
+  --line: rgba(20, 91, 108, 0.18);
+  --line-strong: rgba(20, 91, 108, 0.34);
   --text: #123038;
-  --muted: #647b82;
-  --cyan: #8be2f2;
-  --cyan-strong: #1e90aa;
-  --green: #ccefa5;
-  --green-strong: #5d9d58;
+  --muted: #5d747a;
+  --cyan: #79d7ea;
+  --cyan-strong: #197f9a;
+  --green: #bde68e;
+  --green-strong: #4f8d4c;
   --ink: #10282f;
   --shadow: 0 18px 48px rgba(28, 79, 92, 0.12);
   font-family:
@@ -32,9 +32,9 @@ body {
   min-width: 320px;
   margin: 0;
   background:
-    radial-gradient(circle at 18% 18%, rgba(139, 226, 242, 0.34), transparent 28rem),
-    radial-gradient(circle at 78% 12%, rgba(204, 239, 165, 0.38), transparent 26rem),
-    linear-gradient(145deg, #ffffff 0%, #f4fbfc 52%, #eef9f8 100%);
+    radial-gradient(circle at 18% 18%, rgba(83, 196, 218, 0.32), transparent 28rem),
+    radial-gradient(circle at 78% 12%, rgba(173, 225, 128, 0.34), transparent 26rem),
+    linear-gradient(145deg, #dceff2 0%, #e9f7f5 48%, #d9eee8 100%);
   color: var(--text);
 }
 
@@ -84,7 +84,7 @@ img {
   gap: 24px;
   padding: 14px clamp(18px, 4vw, 58px);
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(232, 247, 247, 0.84);
   backdrop-filter: blur(20px);
 }
 
@@ -119,7 +119,7 @@ img {
 .nav a:hover {
   border-color: var(--line);
   color: var(--text);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(232, 247, 247, 0.76);
 }
 
 .cart-button,
@@ -138,7 +138,7 @@ img {
   padding: 0 15px;
   border: 1px solid rgba(93, 157, 88, 0.24);
   border-radius: 999px;
-  background: rgba(204, 239, 165, 0.34);
+  background: rgba(189, 230, 142, 0.36);
   color: var(--text);
   font-weight: 900;
 }
@@ -263,7 +263,7 @@ p {
 
 .button.ghost {
   border: 1px solid var(--line-strong);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(232, 247, 247, 0.78);
   color: var(--text);
 }
 
@@ -280,10 +280,10 @@ p {
   border: 1px solid var(--line);
   border-radius: 28px;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(239, 250, 249, 0.72)),
-    radial-gradient(circle at 34% 48%, rgba(204, 239, 165, 0.32), transparent 15rem),
-    radial-gradient(circle at 62% 45%, rgba(139, 226, 242, 0.38), transparent 18rem),
-    #f7fcfd;
+    linear-gradient(145deg, rgba(229, 246, 246, 0.95), rgba(207, 232, 235, 0.78)),
+    radial-gradient(circle at 34% 48%, rgba(189, 230, 142, 0.34), transparent 15rem),
+    radial-gradient(circle at 62% 45%, rgba(121, 215, 234, 0.4), transparent 18rem),
+    #d7edf0;
   box-shadow: var(--shadow);
 }
 
@@ -318,7 +318,7 @@ p {
   padding: 16px;
   border: 1px solid rgba(30, 123, 145, 0.16);
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(232, 247, 247, 0.86);
   backdrop-filter: blur(18px);
 }
 
@@ -351,8 +351,8 @@ p {
   min-height: 142px;
   padding: 22px;
   background:
-    radial-gradient(circle at top right, rgba(139, 226, 242, 0.2), transparent 13rem),
-    rgba(255, 255, 255, 0.82);
+    radial-gradient(circle at top right, rgba(121, 215, 234, 0.22), transparent 13rem),
+    rgba(232, 247, 247, 0.82);
 }
 
 .proof-bar span,
@@ -404,7 +404,7 @@ p {
   padding: 28px;
   border: 1px solid var(--line);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(232, 247, 247, 0.78);
 }
 
 .empty-state strong {
@@ -423,8 +423,8 @@ p {
   border: 1px solid var(--line);
   border-radius: 22px;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(246, 252, 252, 0.82)),
-    rgba(255, 255, 255, 0.88);
+    linear-gradient(145deg, rgba(238, 249, 248, 0.92), rgba(219, 240, 241, 0.82)),
+    rgba(232, 247, 247, 0.88);
   box-shadow: 0 14px 34px rgba(28, 79, 92, 0.08);
 }
 
@@ -450,7 +450,7 @@ p {
   overflow: hidden;
   border: 1px solid rgba(147, 244, 239, 0.12);
   border-radius: 18px;
-  background: #edf9fa;
+  background: #d5ecef;
 }
 
 .product-image-shell::before {
@@ -458,8 +458,8 @@ p {
   inset: 0;
   content: "";
   background:
-    radial-gradient(circle at center, rgba(139, 226, 242, 0.24), transparent 62%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.75), transparent);
+    radial-gradient(circle at center, rgba(121, 215, 234, 0.28), transparent 62%),
+    linear-gradient(135deg, rgba(238, 249, 248, 0.68), transparent);
 }
 
 .product-image {
@@ -492,7 +492,7 @@ p {
   padding: 0 10px;
   border: 1px solid rgba(93, 157, 88, 0.2);
   border-radius: 999px;
-  background: rgba(204, 239, 165, 0.28);
+  background: rgba(189, 230, 142, 0.32);
   color: var(--green-strong);
   font-size: 0.76rem;
   font-weight: 900;
@@ -528,7 +528,7 @@ p {
   min-height: 42px;
   padding: 0 15px;
   border-radius: 999px;
-  background: rgba(139, 226, 242, 0.26);
+  background: rgba(121, 215, 234, 0.3);
   color: var(--text);
   font-weight: 900;
 }
@@ -545,8 +545,8 @@ p {
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background:
-    radial-gradient(circle at 18% 40%, rgba(204, 239, 165, 0.26), transparent 28rem),
-    rgba(255, 255, 255, 0.58);
+    radial-gradient(circle at 18% 40%, rgba(189, 230, 142, 0.3), transparent 28rem),
+    rgba(219, 240, 241, 0.66);
 }
 
 .process-copy p:last-child {
@@ -562,7 +562,7 @@ p {
   padding: 22px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(232, 247, 247, 0.8);
 }
 
 .process-grid h3 {
@@ -572,8 +572,8 @@ p {
 .contact {
   justify-content: space-between;
   background:
-    linear-gradient(135deg, rgba(139, 226, 242, 0.2), rgba(204, 239, 165, 0.22)),
-    rgba(255, 255, 255, 0.68);
+    linear-gradient(135deg, rgba(121, 215, 234, 0.24), rgba(189, 230, 142, 0.26)),
+    rgba(219, 240, 241, 0.72);
 }
 
 .contact > div {
@@ -616,7 +616,7 @@ p {
   height: 100%;
   border-left: 1px solid var(--line);
   background:
-    radial-gradient(circle at top, rgba(139, 226, 242, 0.22), transparent 18rem),
+    radial-gradient(circle at top, rgba(121, 215, 234, 0.24), transparent 18rem),
     var(--panel-solid);
   box-shadow: var(--shadow);
   transform: translateX(100%);
@@ -640,7 +640,7 @@ p {
   border: 1px solid var(--line);
   border-radius: 24px;
   background:
-    radial-gradient(circle at top right, rgba(139, 226, 242, 0.22), transparent 18rem),
+    radial-gradient(circle at top right, rgba(121, 215, 234, 0.24), transparent 18rem),
     var(--panel-solid);
   box-shadow: var(--shadow);
   transform: translate(-50%, calc(-50% + 18px));
@@ -678,7 +678,7 @@ p {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(238, 249, 248, 0.88);
   color: var(--text);
   outline: 0;
 }
@@ -823,7 +823,7 @@ p {
   gap: 18px;
   padding: 28px clamp(18px, 4vw, 58px);
   border-top: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(232, 247, 247, 0.78);
 }
 
 .site-footer img {
