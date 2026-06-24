@@ -140,6 +140,10 @@
         <div>
           <p class="eyebrow">Compra orientada</p>
           <h2>Informações claras antes de fechar o pedido.</h2>
+          <p>
+            Atendimento em Taquarituba e região com confirmação pelo WhatsApp.
+            O pedido só é fechado depois de validar estoque, marca, prazo e forma de pagamento.
+          </p>
         </div>
         <div class="guidance-grid">
           <article>
@@ -147,12 +151,12 @@
             <p>Quando aplicável, informe registro, validade, lote e fabricante antes da venda.</p>
           </article>
           <article>
-            <strong>Trocas e divergências</strong>
-            <p>Pedidos são conferidos no atendimento. Trocas dependem da embalagem e condição do item.</p>
+            <strong>Entrega combinada</strong>
+            <p>Frete, retirada e prazo são confirmados antes do pagamento, conforme cidade e disponibilidade.</p>
           </article>
           <article>
-            <strong>Privacidade</strong>
-            <p>Os dados enviados são usados apenas para cotar, confirmar e acompanhar o pedido.</p>
+            <strong>Trocas e privacidade</strong>
+            <p>Dados são usados apenas no pedido. Trocas dependem da embalagem, validade e condição do item.</p>
           </article>
         </div>
       </section>
@@ -165,6 +169,11 @@
             Quer cotar para clínica, cuidador ou reposição doméstica?
             Envie sua lista e receba a confirmação pelo WhatsApp.
           </p>
+          <div class="contact-details" aria-label="Dados da Pluckten Saúde">
+            <span>WhatsApp: (14) 99871-5711</span>
+            <span>CNPJ: 67.607.744/0001-40</span>
+            <span>Taquarituba - SP</span>
+          </div>
         </div>
         <a class="button primary" data-whatsapp-link href="#" target="_blank" rel="noreferrer">
           Chamar no WhatsApp
@@ -250,6 +259,26 @@
           CPF/CNPJ
           <input name="document">
         </label>
+        <div class="checkout-row">
+          <label>
+            Entrega
+            <select name="deliveryPreference">
+              <option value="A combinar">A combinar</option>
+              <option value="Retirada em Taquarituba">Retirada em Taquarituba</option>
+              <option value="Entrega em Taquarituba">Entrega em Taquarituba</option>
+              <option value="Entrega em outra cidade">Entrega em outra cidade</option>
+            </select>
+          </label>
+          <label>
+            Pagamento
+            <select name="paymentPreference">
+              <option value="A combinar">A combinar</option>
+              <option value="Pix">Pix</option>
+              <option value="Cartão">Cartão</option>
+              <option value="Boleto / faturamento">Boleto / faturamento</option>
+            </select>
+          </label>
+        </div>
         <label>
           Endereço ou cidade para entrega
           <textarea name="address" rows="3"></textarea>
@@ -267,6 +296,7 @@
     <footer class="site-footer">
       <img src="assets/pluckten-logo-crop.png" alt="Pluckten Saúde">
       <span>Produtos hospitalares e itens de cuidado. Consulte disponibilidade.</span>
+      <span>Pluckten Saúde • CNPJ 67.607.744/0001-40 • Taquarituba - SP</span>
     </footer>
 
     <script src="script.js"></script>

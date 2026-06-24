@@ -806,6 +806,26 @@ p {
   font-family: Sora, Manrope, sans-serif;
 }
 
+.contact-details {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.contact-details span {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(238, 249, 248, 0.64);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
 .contact {
   justify-content: space-between;
   background:
@@ -907,7 +927,14 @@ p {
   font-weight: 800;
 }
 
+.checkout-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .checkout-card input,
+.checkout-card select,
 .checkout-card textarea,
 .admin-field input,
 .admin-field textarea,
@@ -921,6 +948,7 @@ p {
 }
 
 .checkout-card input,
+.checkout-card select,
 .admin-field input,
 .admin-field select {
   min-height: 46px;
@@ -934,6 +962,7 @@ p {
 }
 
 .checkout-card input:focus,
+.checkout-card select:focus,
 .checkout-card textarea:focus,
 .admin-field input:focus,
 .admin-field textarea:focus,
@@ -1054,9 +1083,9 @@ p {
 }
 
 .site-footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 18px;
   padding: 28px clamp(18px, 4vw, 58px);
   border-top: 1px solid var(--line);
@@ -1101,6 +1130,7 @@ p {
   .catalog-tools,
   .guidance-section,
   .guidance-grid,
+  .checkout-row,
   .product-grid {
     grid-template-columns: 1fr;
   }
@@ -1166,7 +1196,7 @@ p {
   .product-footer,
   .site-footer {
     align-items: stretch;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .add-button {

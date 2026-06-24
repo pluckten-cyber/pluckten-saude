@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "5599999999999";
+const WHATSAPP_NUMBER = "5514998715711";
 
 let products = [];
 let selectedProductId = "";
@@ -349,7 +349,7 @@ async function submitOrder(event) {
   const formData = new FormData(checkoutForm);
   const payload = {
     customer: Object.fromEntries(formData.entries()),
-    deliveryMethod: "A combinar",
+    deliveryMethod: formData.get("deliveryPreference") || "A combinar",
     items: cartPayload(),
   };
 

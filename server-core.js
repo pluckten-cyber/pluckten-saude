@@ -374,6 +374,8 @@ async function createOrder(payload) {
       phone,
       email: String(customer.email || "").trim(),
       document: String(customer.document || "").trim(),
+      paymentPreference: String(customer.paymentPreference || "A combinar").trim(),
+      deliveryPreference: String(customer.deliveryPreference || payload.deliveryMethod || "A combinar").trim(),
       address: String(customer.address || "").trim(),
       notes: String(customer.notes || "").trim(),
     },

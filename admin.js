@@ -220,7 +220,9 @@ function renderOrders() {
             </div>
           </div>
           <p><strong>Cliente:</strong> ${escapeHtml(customer.name)} • ${escapeHtml(customer.phone)}</p>
-          <p><strong>Entrega:</strong> ${escapeHtml(customer.address || "A combinar")}</p>
+          <p><strong>Entrega:</strong> ${escapeHtml(customer.deliveryPreference || order.deliveryMethod || "A combinar")}</p>
+          <p><strong>Pagamento:</strong> ${escapeHtml(customer.paymentPreference || "A combinar")}</p>
+          <p><strong>Endereço/cidade:</strong> ${escapeHtml(customer.address || "A combinar")}</p>
           ${order.deadline ? `<p><strong>Prazo:</strong> ${formatDate(order.deadline)}</p>` : ""}
           <ol class="order-items">
             ${(order.items || [])
@@ -342,6 +344,8 @@ function orderMessage(order) {
     .map((item) => `- ${item.quantity}x ${item.name}: ${formatPrice(item.subtotal)}`)
     .join("\n");
   const deadline = order.deadline ? `\nPrazo combinado: ${formatDate(order.deadline)}` : "";
+  const delivery = customer.deliveryPreference || order.deliveryMethod || "A combinar";
+  const payment = customer.paymentPreference || "A combinar";
 
   return [
     `Olá, ${customer.name || "tudo bem"}! Aqui é da Pluckten Saúde.`,
@@ -350,7 +354,9 @@ function orderMessage(order) {
     "Itens:",
     items,
     "",
-    `Total estimado: ${formatPrice(order.total)}${deadline}`,
+    `Total estimado: ${formatPrice(order.total)}`,
+    `Entrega: ${delivery}`,
+    `Pagamento: ${payment}${deadline}`,
     "",
     "Vou confirmar estoque, marca, validade e entrega por aqui.",
   ].join("\n");
