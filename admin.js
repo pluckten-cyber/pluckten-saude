@@ -22,6 +22,12 @@ const currency = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+const summaryCurrency = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+  maximumFractionDigits: 0,
+});
+
 const availabilityLabels = {
   in_stock: "Pronta entrega",
   on_request: "Sob consulta",
@@ -46,6 +52,10 @@ function cssEscape(value) {
 
 function formatPrice(value) {
   return currency.format(Number(value || 0));
+}
+
+function formatSummaryPrice(value) {
+  return summaryCurrency.format(Number(value || 0));
 }
 
 function formatDate(value) {
@@ -138,7 +148,7 @@ function renderStats() {
   statOrders.textContent = orders.length;
   statProducts.textContent = products.length;
   statOpen.textContent = orders.filter(isOpenOrder).length;
-  statRevenue.textContent = formatPrice(revenue);
+  statRevenue.textContent = formatSummaryPrice(revenue);
 }
 
 function renderProducts() {
