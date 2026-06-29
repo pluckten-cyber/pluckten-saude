@@ -145,6 +145,7 @@
 .admin-field {
   display: grid;
   gap: 8px;
+  min-width: 0;
   color: var(--text);
   font-size: 0.88rem;
   font-weight: 800;
@@ -166,6 +167,8 @@
 .variant-editor {
   display: grid;
   gap: 12px;
+  min-width: 0;
+  overflow: hidden;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -177,6 +180,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .variant-editor-head strong,
@@ -194,17 +199,28 @@
 .variant-list {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .variant-row {
   display: grid;
-  grid-template-columns: minmax(160px, 1.2fr) minmax(100px, 0.7fr) minmax(90px, 0.6fr) minmax(110px, 0.8fr) auto;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
   gap: 10px;
   align-items: end;
+  min-width: 0;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(232, 247, 247, 0.72);
+}
+
+.variant-row .admin-field {
+  min-width: 0;
+}
+
+.variant-row [data-remove-variant] {
+  width: fit-content;
+  max-width: 100%;
 }
 
 .admin-message {
