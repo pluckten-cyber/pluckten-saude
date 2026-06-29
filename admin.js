@@ -293,6 +293,8 @@ async function productPayload() {
     brand: formData.get("brand"),
     sku: formData.get("sku"),
     description: formData.get("description"),
+    usage: formData.get("usage"),
+    salesNotes: formData.get("salesNotes"),
     price: Number(formData.get("price")),
     stock: Number(formData.get("stock")),
     anvisa: formData.get("anvisa"),
@@ -326,6 +328,8 @@ function fillProduct(product) {
   productForm.elements.brand.value = product.brand || "";
   productForm.elements.sku.value = product.sku || "";
   productForm.elements.description.value = product.description;
+  productForm.elements.usage.value = product.usage || "";
+  productForm.elements.salesNotes.value = product.salesNotes || "";
   productForm.elements.price.value = product.price;
   productForm.elements.stock.value = product.stock ?? 0;
   productForm.elements.anvisa.value = product.anvisa || "";

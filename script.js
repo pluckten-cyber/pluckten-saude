@@ -24,6 +24,7 @@ const detailCategory = document.querySelector("[data-detail-category]");
 const detailName = document.querySelector("[data-detail-name]");
 const detailDescription = document.querySelector("[data-detail-description]");
 const detailGrid = document.querySelector("[data-detail-grid]");
+const detailNotes = document.querySelector("[data-detail-notes]");
 const detailPrice = document.querySelector("[data-detail-price]");
 const detailAdd = document.querySelector("[data-detail-add]");
 const cartPanel = document.querySelector("[data-cart-panel]");
@@ -36,6 +37,8 @@ const whatsappLinks = document.querySelectorAll("[data-whatsapp-link]");
 const checkoutModal = document.querySelector("[data-checkout-modal]");
 const checkoutForm = document.querySelector("[data-checkout-form]");
 const checkoutStatus = document.querySelector("[data-checkout-status]");
+const statusForm = document.querySelector("[data-status-form]");
+const statusResult = document.querySelector("[data-status-result]");
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -68,6 +71,26 @@ function availabilityBadge(product) {
 
 function getWhatsAppUrl(message) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+}
+
+function orderWhatsAppMessage(order) {
+  const items = (order.items || [])
+    .map((item) => `- ${item.quantity}x ${item.name}: ${formatPrice(item.subtotal)}`)
+    .join("\n");
+  const customer = order.customer || {};
+
+  return [
+    "Olá, Pluckten Saúde! Acabei de enviar uma cotação pelo site.",
+    `Pedido: ${order.id}`,
+    `Nome: ${customer.name || ""}`,
+    `WhatsApp: ${customer.phone || ""}`,
+    "",
+    "Itens:",
+    items,
+    "",
+    `Total estimado: ${formatPrice(order.total)}`,
+    "Podem confirmar estoque, prazo e pagamento?",
+  ].join("\n");
 }
 
 function setContactLinks() {
@@ -206,6 +229,13 @@ function productDetails(product) {
   ].filter(([, value]) => value !== undefined && value !== null && value !== "");
 }
 
+function productNotes(product) {
+  return [
+    ["Modo de uso / indicação", product.usage],
+    ["Observação de venda", product.salesNotes],
+  ].filter(([, value]) => value);
+}
+
 function openProductDetails(id) {
   const product = products.find((item) => item.id === id);
   if (!product) return;
@@ -224,6 +254,18 @@ function openProductDetails(id) {
           <dt>${escapeHtml(label)}</dt>
           <dd>${escapeHtml(value)}</dd>
         </div>
+      `,
+    )
+    .join("");
+  const notes = productNotes(product);
+  detailNotes.hidden = notes.length === 0;
+  detailNotes.innerHTML = notes
+    .map(
+      ([label, value]) => `
+        <article>
+          <strong>${escapeHtml(label)}</strong>
+          <p>${escapeHtml(value)}</p>
+        </article>
       `,
     )
     .join("");
@@ -327,7 +369,7 @@ function closeCart() {
 function openCheckout() {
   if (cart.size === 0) return;
   checkoutStatus.textContent = "";
-  checkoutStatus.classList.remove("is-error");
+  checkoutStatus.classList.remove("is-error", "is-success");
   checkoutModal.classList.add("is-open");
   checkoutModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("cart-open");
@@ -344,7 +386,7 @@ function closeCheckout() {
 async function submitOrder(event) {
   event.preventDefault();
   checkoutStatus.textContent = "Enviando pedido...";
-  checkoutStatus.classList.remove("is-error");
+  checkoutStatus.classList.remove("is-error", "is-success");
 
   const formData = new FormData(checkoutForm);
   const payload = {
@@ -362,18 +404,63 @@ async function submitOrder(event) {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Não foi possível enviar o pedido.");
 
-    checkoutStatus.textContent = `Pedido ${data.order.id} enviado. A Pluckten vai confirmar prazo e disponibilidade.`;
+    const whatsappUrl = getWhatsAppUrl(orderWhatsAppMessage(data.order));
+    checkoutStatus.classList.add("is-success");
+    checkoutStatus.innerHTML = `
+      <strong>Pedido ${escapeHtml(data.order.id)} enviado.</strong>
+      <span>A Pluckten vai confirmar prazo, estoque e disponibilidade.</span>
+      <div class="checkout-next-actions">
+        <a class="mini-button" href="${whatsappUrl}" target="_blank" rel="noreferrer">Chamar no WhatsApp</a>
+        <a class="mini-button" href="#pedido" data-checkout-close data-cart-close>Consultar status depois</a>
+      </div>
+    `;
     cart.clear();
     renderCart();
     checkoutForm.reset();
-
-    setTimeout(() => {
-      closeCheckout();
-      closeCart();
-    }, 1800);
   } catch (error) {
     checkoutStatus.textContent = error.message;
     checkoutStatus.classList.add("is-error");
+  }
+}
+
+async function submitStatusSearch(event) {
+  event.preventDefault();
+  statusResult.classList.remove("is-error");
+  statusResult.innerHTML = "Consultando pedido...";
+
+  const formData = new FormData(statusForm);
+  const params = new URLSearchParams({
+    orderId: formData.get("orderId"),
+    phone: formData.get("phone"),
+  });
+
+  try {
+    const response = await fetch(`/api/orders/status?${params.toString()}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Não foi possível consultar o pedido.");
+
+    const order = data.order;
+    const deadline = order.deadline ? formatDate(order.deadline) : "A combinar";
+    statusResult.innerHTML = `
+      <article class="status-summary">
+        <div>
+          <span class="stock-badge">${escapeHtml(order.status)}</span>
+          <strong>${escapeHtml(order.id)}</strong>
+        </div>
+        <p><strong>Total:</strong> ${formatPrice(order.total)}</p>
+        <p><strong>Entrega:</strong> ${escapeHtml(order.deliveryMethod || "A combinar")}</p>
+        <p><strong>Pagamento:</strong> ${escapeHtml(order.paymentPreference || "A combinar")}</p>
+        <p><strong>Prazo:</strong> ${escapeHtml(deadline)}</p>
+        <ol>
+          ${(order.items || [])
+            .map((item) => `<li>${Number(item.quantity || 1)}x ${escapeHtml(item.name)} - ${formatPrice(item.subtotal)}</li>`)
+            .join("")}
+        </ol>
+      </article>
+    `;
+  } catch (error) {
+    statusResult.textContent = error.message;
+    statusResult.classList.add("is-error");
   }
 }
 
@@ -445,5 +532,6 @@ productSearch.addEventListener("input", renderProducts);
 categoryFilter.addEventListener("change", renderProducts);
 clearFiltersButton.addEventListener("click", renderProducts);
 checkoutForm.addEventListener("submit", submitOrder);
+statusForm.addEventListener("submit", submitStatusSearch);
 setContactLinks();
 loadProducts();

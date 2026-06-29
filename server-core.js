@@ -279,6 +279,8 @@ function normalizeProduct(input, existingId) {
     brand: String(input.brand || "").trim(),
     sku: String(input.sku || "").trim(),
     description: String(input.description || "").trim(),
+    usage: String(input.usage || "").trim(),
+    salesNotes: String(input.salesNotes || "").trim(),
     price,
     stock: Math.max(0, Number(input.stock || 0)),
     anvisa: String(input.anvisa || "").trim(),
@@ -328,6 +330,40 @@ async function uploadProductImage(product) {
   return {
     ...product,
     image: data.publicUrl,
+  };
+}
+
+function onlyDigits(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function phonesMatch(a, b) {
+  const left = onlyDigits(a);
+  const right = onlyDigits(b);
+  if (!left || !right) return false;
+  return left.endsWith(right) || right.endsWith(left);
+}
+
+function publicOrder(order) {
+  const customer = order.customer || {};
+  return {
+    id: order.id,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    status: order.status,
+    deadline: order.deadline,
+    deliveryMethod: customer.deliveryPreference || order.deliveryMethod || "A combinar",
+    paymentPreference: customer.paymentPreference || "A combinar",
+    customer: {
+      name: customer.name,
+      phone: customer.phone,
+    },
+    items: (order.items || []).map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      subtotal: item.subtotal,
+    })),
+    total: order.total,
   };
 }
 
@@ -389,6 +425,22 @@ async function handleApi(req, res, pathname) {
   try {
     if (req.method === "GET" && pathname === "/api/products") {
       sendJson(res, 200, { products: await listProducts() });
+      return true;
+    }
+
+    if (req.method === "GET" && pathname === "/api/orders/status") {
+      const url = new URL(req.url, `https://${req.headers.host || "localhost"}`);
+      const orderId = String(url.searchParams.get("orderId") || "").trim();
+      const phone = String(url.searchParams.get("phone") || "").trim();
+      if (!orderId || !phone) throw new Error("Informe código do pedido e WhatsApp.");
+
+      const orders = await listOrders();
+      const order = orders.find((entry) => String(entry.id).toLowerCase() === orderId.toLowerCase());
+      if (!order || !phonesMatch(order.customer?.phone, phone)) {
+        throw new Error("Pedido não encontrado para esse telefone.");
+      }
+
+      sendJson(res, 200, { order: publicOrder(order) });
       return true;
     }
 

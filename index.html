@@ -25,6 +25,7 @@
       <nav class="nav" aria-label="Principal">
         <a href="#produtos">Catálogo</a>
         <a href="#confianca">Como vendemos</a>
+        <a href="#pedido">Consultar pedido</a>
         <a href="#orientacoes">Orientações</a>
         <a href="#contato">Contato</a>
       </nav>
@@ -183,6 +184,29 @@
         </div>
       </section>
 
+      <section class="order-status-section" id="pedido">
+        <div>
+          <p class="eyebrow">Acompanhe seu pedido</p>
+          <h2>Consulte o status pelo código recebido.</h2>
+          <p>
+            Informe o código do pedido e o WhatsApp usado na cotação. Por segurança,
+            mostramos apenas pedidos que combinam com esse telefone.
+          </p>
+        </div>
+        <form class="status-card" data-status-form>
+          <label>
+            Código do pedido
+            <input name="orderId" placeholder="Ex.: PLK-20260625-ABC123" required>
+          </label>
+          <label>
+            WhatsApp
+            <input name="phone" autocomplete="tel" placeholder="(14) 99871-5711" required>
+          </label>
+          <button class="button primary full" type="submit">Consultar status</button>
+          <div class="status-result" data-status-result></div>
+        </form>
+      </section>
+
       <section class="contact" id="contato">
         <div>
           <p class="eyebrow">Atendimento Pluckten</p>
@@ -215,6 +239,7 @@
           <h2 data-detail-name></h2>
           <p data-detail-description></p>
           <dl class="detail-grid" data-detail-grid></dl>
+          <div class="detail-notes" data-detail-notes hidden></div>
           <div class="product-footer">
             <span class="price" data-detail-price></span>
             <button class="add-button" type="button" data-detail-add>Adicionar</button>

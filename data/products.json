@@ -14,7 +14,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "LUV-2026A",
-    "validity": "2028-02-28"
+    "validity": "2028-02-28",
+    "usage": "Uso conforme rotina do procedimento e orientação do responsável técnico.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "mascara-cirurgica",
@@ -31,7 +33,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "MAS-2026A",
-    "validity": "2028-01-31"
+    "validity": "2028-01-31",
+    "usage": "Utilize como barreira de proteção e descarte conforme orientação local.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "alcool-70",
@@ -48,7 +52,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "ALC-2026A",
-    "validity": "2027-12-31"
+    "validity": "2027-12-31",
+    "usage": "Aplicar conforme instruções do fabricante e finalidade indicada no rótulo.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "gaze-esteril",
@@ -65,7 +71,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "GAZ-2026A",
-    "validity": "2029-03-31"
+    "validity": "2029-03-31",
+    "usage": "Uso externo. Higienize a área e siga orientação profissional quando necessário.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "esparadrapo",
@@ -82,7 +90,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "ESP-2026A",
-    "validity": "2028-09-30"
+    "validity": "2028-09-30",
+    "usage": "Uso externo. Higienize a área e siga orientação profissional quando necessário.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "curativo-adesivo",
@@ -99,7 +109,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "CUR-2026A",
-    "validity": "2028-11-30"
+    "validity": "2028-11-30",
+    "usage": "Uso externo. Higienize a área e siga orientação profissional quando necessário.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "seringa-descartavel",
@@ -116,7 +128,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "on_request",
     "batch": "SER-2026A",
-    "validity": "2029-06-30"
+    "validity": "2029-06-30",
+    "usage": "Produto de uso profissional. Confirmar indicação, registro e lote antes do uso.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "avental-descartavel",
@@ -133,7 +147,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "AVE-2026A",
-    "validity": "2028-05-31"
+    "validity": "2028-05-31",
+    "usage": "Utilize como barreira de proteção e descarte conforme orientação local.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "touca-descartavel",
@@ -150,7 +166,9 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "TOU-2026A",
-    "validity": "2028-07-31"
+    "validity": "2028-07-31",
+    "usage": "Utilize como barreira de proteção e descarte conforme orientação local.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   },
   {
     "id": "termometro-digital",
@@ -167,6 +185,8 @@
     "anvisa": "Consultar regularização do fornecedor",
     "availability": "in_stock",
     "batch": "TER-2026A",
-    "validity": "2028-12-31"
+    "validity": "2028-12-31",
+    "usage": "Leia o manual do fabricante antes do uso e mantenha o item higienizado.",
+    "salesNotes": "Confirme marca, lote, validade e disponibilidade no atendimento antes de fechar a compra."
   }
 ]
