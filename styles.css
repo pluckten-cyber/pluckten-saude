@@ -792,6 +792,34 @@ p {
   font-size: clamp(1.8rem, 4vw, 3.4rem);
 }
 
+.variant-picker {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.variant-picker[hidden] {
+  display: none;
+}
+
+.variant-picker select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(238, 249, 248, 0.88);
+  color: var(--text);
+  outline: 0;
+}
+
+.variant-picker select:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(102, 232, 255, 0.12);
+}
+
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

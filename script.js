@@ -23,6 +23,8 @@ const detailImage = document.querySelector("[data-detail-image]");
 const detailCategory = document.querySelector("[data-detail-category]");
 const detailName = document.querySelector("[data-detail-name]");
 const detailDescription = document.querySelector("[data-detail-description]");
+const variantPicker = document.querySelector("[data-variant-picker]");
+const detailVariant = document.querySelector("[data-detail-variant]");
 const detailGrid = document.querySelector("[data-detail-grid]");
 const detailNotes = document.querySelector("[data-detail-notes]");
 const detailPrice = document.querySelector("[data-detail-price]");
@@ -62,6 +64,35 @@ function formatDate(value) {
 
 function getAvailability(product) {
   return availabilityLabels[product.availability] ? product.availability : "in_stock";
+}
+
+function getVariants(product) {
+  return Array.isArray(product.variants) ? product.variants : [];
+}
+
+function findVariant(product, variantId) {
+  return getVariants(product).find((variant) => variant.id === variantId) || null;
+}
+
+function productDisplayPrice(product) {
+  const variants = getVariants(product);
+  if (variants.length === 0) return Number(product.price || 0);
+  return Math.min(...variants.map((variant) => Number(variant.price || 0)));
+}
+
+function productDisplayStock(product) {
+  const variants = getVariants(product);
+  if (variants.length === 0) return Number(product.stock || 0);
+  return variants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0);
+}
+
+function cartKey(id, variantId = "") {
+  return `${id}::${variantId}`;
+}
+
+function parseCartKey(key) {
+  const [id, variantId = ""] = String(key).split("::");
+  return { id, variantId };
 }
 
 function availabilityBadge(product) {
@@ -140,6 +171,7 @@ function filteredProducts() {
       product.brand,
       product.sku,
       product.anvisa,
+      ...getVariants(product).flatMap((variant) => [variant.name, variant.sku]),
     ]
       .join(" ")
       .toLowerCase();
@@ -177,9 +209,11 @@ function renderProducts() {
     .map((product, index) => {
       const availability = getAvailability(product);
       const code = product.sku || `PLK-${String(index + 1).padStart(2, "0")}`;
+      const variants = getVariants(product);
       const disabled = availability === "unavailable" ? "disabled" : "";
       const stockText =
-        availability === "on_request" ? "estoque sob consulta" : `estoque: ${Number(product.stock || 0)}`;
+        availability === "on_request" ? "estoque sob consulta" : `estoque: ${productDisplayStock(product)}`;
+      const priceLabel = variants.length ? `A partir de ${formatPrice(productDisplayPrice(product))}` : formatPrice(product.price);
 
       return `
         <article class="product-card" data-view-product="${escapeHtml(product.id)}">
@@ -195,17 +229,18 @@ function renderProducts() {
             <p>${escapeHtml(product.description)}</p>
             <div class="product-badges">
               ${availabilityBadge(product)}
+              ${variants.length ? `<span class="stock-badge">${variants.length} opções</span>` : ""}
               ${product.brand ? `<span class="product-code">${escapeHtml(product.brand)}</span>` : ""}
               <span class="product-code">${escapeHtml(product.pack)} • ${escapeHtml(stockText)}</span>
             </div>
             <div class="product-footer">
-              <span class="price">${formatPrice(product.price)}</span>
+              <span class="price">${priceLabel}</span>
               <div class="product-actions">
                 <button class="mini-button" type="button" data-view-product="${escapeHtml(product.id)}">
                   Detalhes
                 </button>
                 <button class="add-button" type="button" data-add-product="${escapeHtml(product.id)}" ${disabled}>
-                  ${availability === "on_request" ? "Consultar" : "Adicionar"}
+                  ${variants.length ? "Escolher" : availability === "on_request" ? "Consultar" : "Adicionar"}
                 </button>
               </div>
             </div>
@@ -217,15 +252,23 @@ function renderProducts() {
 }
 
 function productDetails(product) {
+  const selectedVariant = findVariant(product, detailVariant.value);
   return [
     ["Marca", product.brand],
-    ["SKU", product.sku],
+    ["SKU", selectedVariant?.sku || product.sku],
     ["Embalagem", product.pack],
     ["Regularização / ANVISA", product.anvisa],
     ["Lote", product.batch],
     ["Validade", formatDate(product.validity)],
     ["Disponibilidade", availabilityLabels[getAvailability(product)]],
-    ["Estoque", getAvailability(product) === "on_request" ? "Sob consulta" : Number(product.stock || 0)],
+    [
+      "Estoque",
+      getAvailability(product) === "on_request"
+        ? "Sob consulta"
+        : selectedVariant
+          ? Number(selectedVariant.stock || 0)
+          : productDisplayStock(product),
+    ],
   ].filter(([, value]) => value !== undefined && value !== null && value !== "");
 }
 
@@ -239,6 +282,7 @@ function productNotes(product) {
 function openProductDetails(id) {
   const product = products.find((item) => item.id === id);
   if (!product) return;
+  const variants = getVariants(product);
 
   selectedProductId = id;
   detailImage.src = product.image;
@@ -246,7 +290,18 @@ function openProductDetails(id) {
   detailCategory.textContent = product.category || "Produto";
   detailName.textContent = product.name;
   detailDescription.textContent = product.description || "";
-  detailPrice.textContent = formatPrice(product.price);
+  variantPicker.hidden = variants.length === 0;
+  detailVariant.innerHTML = variants
+    .map(
+      (variant) => `
+        <option value="${escapeHtml(variant.id)}">
+          ${escapeHtml(variant.name)} - ${formatPrice(variant.price)}
+        </option>
+      `,
+    )
+    .join("");
+  detailVariant.value = variants[0]?.id || "";
+  detailPrice.textContent = variants.length ? formatPrice(variants[0].price) : formatPrice(product.price);
   detailGrid.innerHTML = productDetails(product)
     .map(
       ([label, value]) => `
@@ -270,11 +325,28 @@ function openProductDetails(id) {
     )
     .join("");
   detailAdd.disabled = getAvailability(product) === "unavailable";
-  detailAdd.textContent = getAvailability(product) === "on_request" ? "Consultar" : "Adicionar";
+  detailAdd.textContent = variants.length ? "Adicionar opção" : getAvailability(product) === "on_request" ? "Consultar" : "Adicionar";
 
   productModal.classList.add("is-open");
   productModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("cart-open");
+}
+
+function updateDetailVariant() {
+  const product = products.find((item) => item.id === selectedProductId);
+  if (!product) return;
+  const variant = findVariant(product, detailVariant.value);
+  detailPrice.textContent = formatPrice(variant?.price ?? product.price);
+  detailGrid.innerHTML = productDetails(product)
+    .map(
+      ([label, value]) => `
+        <div>
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(value)}</dd>
+        </div>
+      `,
+    )
+    .join("");
 }
 
 function closeProductDetails() {
@@ -287,12 +359,15 @@ function closeProductDetails() {
 
 function getCartSummary() {
   return [...cart.entries()].reduce(
-    (summary, [id, quantity]) => {
+    (summary, [key, quantity]) => {
+      const { id, variantId } = parseCartKey(key);
       const product = products.find((item) => item.id === id);
       if (!product) return summary;
+      const variant = findVariant(product, variantId);
+      const price = variant ? variant.price : product.price;
 
       summary.count += quantity;
-      summary.total += product.price * quantity;
+      summary.total += price * quantity;
       return summary;
     },
     { count: 0, total: 0 },
@@ -300,25 +375,32 @@ function getCartSummary() {
 }
 
 function cartPayload() {
-  return [...cart.entries()].map(([id, quantity]) => ({ id, quantity }));
+  return [...cart.entries()].map(([key, quantity]) => {
+    const { id, variantId } = parseCartKey(key);
+    return { id, variantId, quantity };
+  });
 }
 
 function renderCart() {
   const rows = [...cart.entries()]
-    .map(([id, quantity]) => {
+    .map(([key, quantity]) => {
+      const { id, variantId } = parseCartKey(key);
       const product = products.find((item) => item.id === id);
       if (!product) return "";
+      const variant = findVariant(product, variantId);
+      const price = variant ? variant.price : product.price;
+      const label = variant ? `${product.name} - ${variant.name}` : product.name;
 
       return `
         <article class="cart-row">
           <div>
-            <h3>${escapeHtml(product.name)}</h3>
-            <p>${formatPrice(product.price)} cada</p>
+            <h3>${escapeHtml(label)}</h3>
+            <p>${formatPrice(price)} cada</p>
           </div>
-          <div class="qty-control" aria-label="Quantidade de ${escapeHtml(product.name)}">
-            <button type="button" data-decrease="${escapeHtml(id)}" aria-label="Diminuir">−</button>
+          <div class="qty-control" aria-label="Quantidade de ${escapeHtml(label)}">
+            <button type="button" data-decrease="${escapeHtml(key)}" aria-label="Diminuir">−</button>
             <span>${quantity}</span>
-            <button type="button" data-increase="${escapeHtml(id)}" aria-label="Aumentar">+</button>
+            <button type="button" data-increase="${escapeHtml(key)}" aria-label="Aumentar">+</button>
           </div>
         </article>
       `;
@@ -333,20 +415,27 @@ function renderCart() {
   cartFooter.hidden = summary.count === 0;
 }
 
-function addToCart(id) {
+function addToCart(id, variantId = "") {
   const product = products.find((item) => item.id === id);
   if (!product || getAvailability(product) === "unavailable") return;
-  cart.set(id, (cart.get(id) || 0) + 1);
+  const variants = getVariants(product);
+  if (variants.length > 0 && !findVariant(product, variantId)) {
+    openProductDetails(id);
+    return false;
+  }
+  const key = cartKey(id, variantId);
+  cart.set(key, (cart.get(key) || 0) + 1);
   renderCart();
+  return true;
 }
 
-function updateQuantity(id, delta) {
-  const nextQuantity = (cart.get(id) || 0) + delta;
+function updateQuantity(key, delta) {
+  const nextQuantity = (cart.get(key) || 0) + delta;
 
   if (nextQuantity <= 0) {
-    cart.delete(id);
+    cart.delete(key);
   } else {
-    cart.set(id, nextQuantity);
+    cart.set(key, nextQuantity);
   }
 
   renderCart();
@@ -471,8 +560,8 @@ document.addEventListener("click", (event) => {
   const decreaseButton = event.target.closest("[data-decrease]");
 
   if (addButton) {
-    addToCart(addButton.dataset.addProduct);
-    if (!addButton.disabled) openCart();
+    const added = addToCart(addButton.dataset.addProduct);
+    if (added && !addButton.disabled) openCart();
     return;
   }
 
@@ -482,7 +571,10 @@ document.addEventListener("click", (event) => {
   }
 
   if (event.target.closest("[data-detail-add]")) {
-    addToCart(selectedProductId);
+    const product = products.find((item) => item.id === selectedProductId);
+    const variantId = getVariants(product || {}).length ? detailVariant.value : "";
+    const added = addToCart(selectedProductId, variantId);
+    if (!added) return;
     closeProductDetails();
     openCart();
     return;
@@ -538,5 +630,6 @@ categoryFilter.addEventListener("change", renderProducts);
 clearFiltersButton.addEventListener("click", renderProducts);
 checkoutForm.addEventListener("submit", submitOrder);
 statusForm.addEventListener("submit", submitStatusSearch);
+detailVariant.addEventListener("change", updateDetailVariant);
 setContactLinks();
 loadProducts();

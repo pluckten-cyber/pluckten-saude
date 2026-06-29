@@ -260,6 +260,26 @@ function slugify(value) {
     .slice(0, 64);
 }
 
+function normalizeVariants(input, productName) {
+  const variants = Array.isArray(input.variants) ? input.variants : [];
+  return variants
+    .map((variant) => {
+      const name = String(variant.name || "").trim();
+      const price = Number(variant.price);
+      if (!name || !Number.isFinite(price) || price < 0) return null;
+
+      const baseId = variant.id || `${productName}-${name}`;
+      return {
+        id: slugify(baseId) || crypto.randomUUID(),
+        name,
+        price,
+        stock: Math.max(0, Number(variant.stock || 0)),
+        sku: String(variant.sku || "").trim(),
+      };
+    })
+    .filter(Boolean);
+}
+
 function normalizeProduct(input, existingId) {
   const name = String(input.name || "").trim();
   if (!name) throw new Error("Nome do produto é obrigatório.");
@@ -281,6 +301,7 @@ function normalizeProduct(input, existingId) {
     description: String(input.description || "").trim(),
     usage: String(input.usage || "").trim(),
     salesNotes: String(input.salesNotes || "").trim(),
+    variants: normalizeVariants(input, name),
     price,
     stock: Math.max(0, Number(input.stock || 0)),
     anvisa: String(input.anvisa || "").trim(),
@@ -375,13 +396,20 @@ async function createOrder(payload) {
       const product = products.find((entry) => entry.id === item.id);
       const quantity = Math.max(1, Number(item.quantity || 1));
       if (!product) return null;
+      const variants = Array.isArray(product.variants) ? product.variants : [];
+      const variant = item.variantId ? variants.find((entry) => entry.id === item.variantId) : null;
+      if (variants.length > 0 && !variant) return null;
+      const itemName = variant ? `${product.name} - ${variant.name}` : product.name;
+      const itemPrice = variant ? variant.price : product.price;
 
       return {
         id: product.id,
-        name: product.name,
-        price: product.price,
+        variantId: variant?.id || "",
+        name: itemName,
+        variantName: variant?.name || "",
+        price: itemPrice,
         quantity,
-        subtotal: Number((product.price * quantity).toFixed(2)),
+        subtotal: Number((itemPrice * quantity).toFixed(2)),
       };
     })
     .filter(Boolean);

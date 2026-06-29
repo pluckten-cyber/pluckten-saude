@@ -9,6 +9,7 @@ const orderList = document.querySelector("[data-order-list]");
 const orderSearch = document.querySelector("[data-order-search]");
 const orderFilter = document.querySelector("[data-order-filter]");
 const imagePreview = document.querySelector("[data-image-preview]");
+const variantList = document.querySelector("[data-variant-list]");
 const statOrders = document.querySelector("[data-stat-orders]");
 const statProducts = document.querySelector("[data-stat-products]");
 const statOpen = document.querySelector("[data-stat-open]");
@@ -88,6 +89,12 @@ function getAvailability(product) {
   return availabilityLabels[product.availability] ? product.availability : "in_stock";
 }
 
+function productDisplayPrice(product) {
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  if (variants.length === 0) return Number(product.price || 0);
+  return Math.min(...variants.map((variant) => Number(variant.price || 0)));
+}
+
 async function api(path, options = {}) {
   const response = await fetch(path, {
     credentials: "same-origin",
@@ -160,6 +167,7 @@ function renderProducts() {
   productList.innerHTML = products
     .map((product) => {
       const availability = getAvailability(product);
+      const variants = Array.isArray(product.variants) ? product.variants : [];
       return `
         <article class="admin-product-card">
           <div class="admin-product-head">
@@ -173,8 +181,9 @@ function renderProducts() {
             <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </div>
           <p>${escapeHtml(product.category)} • ${escapeHtml(product.pack)} • estoque ${Number(product.stock || 0)}</p>
+          ${variants.length ? `<p>${variants.length} variação${variants.length > 1 ? "ões" : ""} cadastrada${variants.length > 1 ? "s" : ""}</p>` : ""}
           ${product.brand || product.sku ? `<p>${escapeHtml(product.brand || "Sem marca")} • ${escapeHtml(product.sku || "sem SKU")}</p>` : ""}
-          <p>${formatPrice(product.price)}</p>
+          <p>${variants.length ? "A partir de " : ""}${formatPrice(productDisplayPrice(product))}</p>
           <div class="mini-actions">
             <button class="mini-button" type="button" data-edit-product="${escapeHtml(product.id)}">Editar</button>
             <button class="mini-button danger" type="button" data-delete-product="${escapeHtml(product.id)}">Excluir</button>
@@ -183,6 +192,45 @@ function renderProducts() {
       `;
     })
     .join("");
+}
+
+function variantRow(variant = {}) {
+  return `
+    <article class="variant-row">
+      <label class="admin-field">
+        Nome/tamanho
+        <input data-variant-name value="${escapeHtml(variant.name || "")}" placeholder="Ex.: 5 cm x 10 m">
+      </label>
+      <label class="admin-field">
+        Preço
+        <input data-variant-price type="number" min="0" step="0.01" value="${escapeHtml(variant.price ?? "")}">
+      </label>
+      <label class="admin-field">
+        Estoque
+        <input data-variant-stock type="number" min="0" step="1" value="${escapeHtml(variant.stock ?? 0)}">
+      </label>
+      <label class="admin-field">
+        SKU
+        <input data-variant-sku value="${escapeHtml(variant.sku || "")}" placeholder="Opcional">
+      </label>
+      <button class="mini-button danger" type="button" data-remove-variant>Remover</button>
+    </article>
+  `;
+}
+
+function renderVariantRows(variants = []) {
+  variantList.innerHTML = variants.map((variant) => variantRow(variant)).join("");
+}
+
+function variantPayload() {
+  return [...variantList.querySelectorAll(".variant-row")]
+    .map((row) => ({
+      name: row.querySelector("[data-variant-name]").value,
+      price: Number(row.querySelector("[data-variant-price]").value),
+      stock: Number(row.querySelector("[data-variant-stock]").value),
+      sku: row.querySelector("[data-variant-sku]").value,
+    }))
+    .filter((variant) => variant.name.trim() && Number.isFinite(variant.price) && variant.price >= 0);
 }
 
 function filteredOrders() {
@@ -295,6 +343,7 @@ async function productPayload() {
     description: formData.get("description"),
     usage: formData.get("usage"),
     salesNotes: formData.get("salesNotes"),
+    variants: variantPayload(),
     price: Number(formData.get("price")),
     stock: Number(formData.get("stock")),
     anvisa: formData.get("anvisa"),
@@ -330,6 +379,7 @@ function fillProduct(product) {
   productForm.elements.description.value = product.description;
   productForm.elements.usage.value = product.usage || "";
   productForm.elements.salesNotes.value = product.salesNotes || "";
+  renderVariantRows(product.variants || []);
   productForm.elements.price.value = product.price;
   productForm.elements.stock.value = product.stock ?? 0;
   productForm.elements.anvisa.value = product.anvisa || "";
@@ -348,6 +398,7 @@ function resetProductForm() {
   productForm.elements.id.value = "";
   productForm.elements.availability.value = "in_stock";
   productForm.elements.active.checked = true;
+  renderVariantRows();
   setImagePreview("");
   setMessage(productMessage, "");
 }
@@ -454,6 +505,14 @@ document.addEventListener("click", async (event) => {
 
   if (event.target.closest("[data-new-product]")) {
     resetProductForm();
+  }
+
+  if (event.target.closest("[data-add-variant]")) {
+    variantList.insertAdjacentHTML("beforeend", variantRow());
+  }
+
+  if (event.target.closest("[data-remove-variant]")) {
+    event.target.closest(".variant-row")?.remove();
   }
 
   if (event.target.closest("[data-refresh]")) {
