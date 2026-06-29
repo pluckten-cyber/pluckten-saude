@@ -537,7 +537,12 @@ p {
   background:
     linear-gradient(145deg, rgba(238, 249, 248, 0.92), rgba(219, 240, 241, 0.82)),
     rgba(232, 247, 247, 0.88);
+  cursor: pointer;
   box-shadow: 0 14px 34px rgba(28, 79, 92, 0.08);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .product-card::after {
@@ -552,6 +557,12 @@ p {
 
 .product-card:hover::after {
   opacity: 1;
+}
+
+.product-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: 0 18px 42px rgba(28, 79, 92, 0.12);
+  transform: translateY(-1px);
 }
 
 .product-image-shell {

@@ -182,7 +182,7 @@ function renderProducts() {
         availability === "on_request" ? "estoque sob consulta" : `estoque: ${Number(product.stock || 0)}`;
 
       return `
-        <article class="product-card">
+        <article class="product-card" data-view-product="${escapeHtml(product.id)}">
           <div class="product-image-shell">
             <img class="product-image" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </div>
@@ -473,24 +473,29 @@ document.addEventListener("click", (event) => {
   if (addButton) {
     addToCart(addButton.dataset.addProduct);
     if (!addButton.disabled) openCart();
+    return;
   }
 
   if (viewButton) {
     openProductDetails(viewButton.dataset.viewProduct);
+    return;
   }
 
   if (event.target.closest("[data-detail-add]")) {
     addToCart(selectedProductId);
     closeProductDetails();
     openCart();
+    return;
   }
 
   if (increaseButton) {
     updateQuantity(increaseButton.dataset.increase, 1);
+    return;
   }
 
   if (decreaseButton) {
     updateQuantity(decreaseButton.dataset.decrease, -1);
+    return;
   }
 
   if (event.target.closest("[data-clear-filters]")) {
