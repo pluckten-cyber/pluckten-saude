@@ -518,8 +518,8 @@ p {
   grid-template-columns: clamp(168px, 14vw, 210px) minmax(0, 1fr);
   gap: 16px;
   overflow: hidden;
-  min-height: 232px;
-  padding: 14px;
+  min-height: 250px;
+  padding: 16px;
   border: 1px solid var(--line);
   border-radius: 22px;
   background:
@@ -557,7 +557,7 @@ p {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 204px;
+  min-height: 228px;
   overflow: hidden;
   border: 1px solid rgba(147, 244, 239, 0.12);
   border-radius: 18px;
@@ -580,8 +580,8 @@ p {
   padding: 2px;
   object-fit: contain;
   object-position: center;
-  opacity: 0.92;
-  filter: saturate(0.82) contrast(1.02);
+  opacity: 0.97;
+  filter: saturate(0.94) contrast(1.03);
 }
 
 .product-body {
@@ -638,6 +638,7 @@ p {
   margin-top: -4px;
   font-size: clamp(1.12rem, 2vw, 1.45rem);
   letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .product-card p {
@@ -658,6 +659,22 @@ p {
   justify-content: space-between;
   gap: 12px;
   margin-top: auto;
+}
+
+.price-stack {
+  display: grid;
+  gap: 5px;
+}
+
+.price-stack .stock-badge {
+  margin-bottom: 2px;
+}
+
+.price-stack small {
+  max-width: 220px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .product-actions {
@@ -720,9 +737,9 @@ p {
   top: 50%;
   left: 50%;
   display: grid;
-  grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1fr);
-  gap: 20px;
-  width: min(920px, calc(100vw - 28px));
+  grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1fr);
+  gap: 24px;
+  width: min(1040px, calc(100vw - 28px));
   max-height: calc(100vh - 28px);
   overflow: auto;
   padding: 18px;
@@ -754,7 +771,7 @@ p {
 .detail-image-shell {
   display: grid;
   place-items: center;
-  min-height: 360px;
+  min-height: 430px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 20px;
@@ -764,7 +781,7 @@ p {
 .detail-image-shell img {
   width: 100%;
   height: 100%;
-  padding: 10px;
+  padding: 16px;
   object-fit: contain;
   object-position: center;
 }
@@ -772,12 +789,13 @@ p {
 .detail-copy {
   display: grid;
   align-content: start;
-  gap: 16px;
+  gap: 18px;
   padding: 14px 46px 14px 0;
 }
 
 .detail-copy h2 {
-  font-size: clamp(1.8rem, 4vw, 3.4rem);
+  font-size: clamp(1.8rem, 3.6vw, 3.2rem);
+  text-transform: uppercase;
 }
 
 .detail-trust {
@@ -841,7 +859,7 @@ p {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 14px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: rgba(238, 249, 248, 0.7);
@@ -876,6 +894,12 @@ p {
 .variant-option b {
   color: var(--green);
   font-family: Sora, Manrope, sans-serif;
+}
+
+.detail-copy .product-footer {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 .detail-grid {

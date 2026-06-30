@@ -222,6 +222,7 @@ function renderProducts() {
       const stockText =
         availability === "on_request" ? "estoque sob consulta" : `estoque: ${productDisplayStock(product)}`;
       const priceLabel = variants.length ? `A partir de ${formatPrice(productDisplayPrice(product))}` : formatPrice(product.price);
+      const availabilityText = availabilityLabels[availability];
 
       return `
         <article class="product-card" data-view-product="${escapeHtml(product.id)}">
@@ -236,13 +237,17 @@ function renderProducts() {
             <h3>${escapeHtml(product.name)}</h3>
             <p>${escapeHtml(product.description)}</p>
             <div class="product-badges">
-              ${availabilityBadge(product)}
               ${variants.length ? `<span class="stock-badge">${variants.length} opções</span>` : ""}
               ${product.brand ? `<span class="product-code">${escapeHtml(product.brand)}</span>` : ""}
-              <span class="product-code">${escapeHtml(product.pack)} • ${escapeHtml(stockText)}</span>
+              <span class="product-code">${escapeHtml(product.pack)}</span>
+              <span class="product-code">${escapeHtml(stockText)}</span>
             </div>
             <div class="product-footer">
-              <span class="price">${priceLabel}</span>
+              <div class="price-stack">
+                ${availabilityBadge(product)}
+                <span class="price">${priceLabel}</span>
+                <small>${escapeHtml(availabilityText)} com confirmação no atendimento</small>
+              </div>
               <div class="product-actions">
                 <button class="mini-button" type="button" data-view-product="${escapeHtml(product.id)}">
                   Detalhes

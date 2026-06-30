@@ -8,6 +8,7 @@ const productList = document.querySelector("[data-product-list]");
 const orderList = document.querySelector("[data-order-list]");
 const orderSearch = document.querySelector("[data-order-search]");
 const orderFilter = document.querySelector("[data-order-filter]");
+const orderQuickFilters = document.querySelectorAll("[data-order-quick-filter]");
 const imagePreview = document.querySelector("[data-image-preview]");
 const variantList = document.querySelector("[data-variant-list]");
 const statOrders = document.querySelector("[data-stat-orders]");
@@ -17,6 +18,7 @@ const statRevenue = document.querySelector("[data-stat-revenue]");
 
 let products = [];
 let orders = [];
+let quickOrderFilter = "";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -83,6 +85,12 @@ function isOverdue(order) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return deadline < today;
+}
+
+function normalizePhoneForWhatsApp(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return "";
+  return digits.startsWith("55") ? digits : `55${digits}`;
 }
 
 function getAvailability(product) {
@@ -244,7 +252,12 @@ function filteredOrders() {
       .toLowerCase();
     const matchesQuery = !query || searchable.includes(query);
     const matchesStatus = !status || order.status === status;
-    return matchesQuery && matchesStatus;
+    const matchesQuick =
+      !quickOrderFilter ||
+      (quickOrderFilter === "open" && isOpenOrder(order)) ||
+      (quickOrderFilter === "overdue" && isOverdue(order)) ||
+      (quickOrderFilter === "done" && !isOpenOrder(order));
+    return matchesQuery && matchesStatus && matchesQuick;
   });
 }
 
@@ -265,6 +278,8 @@ function renderOrders() {
     .map((order) => {
       const customer = order.customer || {};
       const overdue = isOverdue(order);
+      const phone = normalizePhoneForWhatsApp(customer.phone);
+      const whatsappHref = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(orderMessage(order))}` : "#";
       return `
         <article class="order-card ${overdue ? "is-overdue" : ""}">
           <div class="order-head">
@@ -277,17 +292,21 @@ function renderOrders() {
               <span class="pill">${escapeHtml(order.status || "novo")}</span>
             </div>
           </div>
-          <p><strong>Cliente:</strong> ${escapeHtml(customer.name)} • ${escapeHtml(customer.phone)}</p>
-          <p><strong>Entrega:</strong> ${escapeHtml(customer.deliveryPreference || order.deliveryMethod || "A combinar")}</p>
-          <p><strong>Pagamento:</strong> ${escapeHtml(customer.paymentPreference || "A combinar")}</p>
-          <p><strong>Endereço/cidade:</strong> ${escapeHtml(customer.address || "A combinar")}</p>
-          ${order.deadline ? `<p><strong>Prazo:</strong> ${formatDate(order.deadline)}</p>` : ""}
+          <div class="order-summary-line">
+            <span><strong>Cliente:</strong> ${escapeHtml(customer.name)} • ${escapeHtml(customer.phone)}</span>
+            <span><strong>Total:</strong> ${formatPrice(order.total)}</span>
+          </div>
+          <div class="order-info-grid">
+            <p><strong>Entrega:</strong> ${escapeHtml(customer.deliveryPreference || order.deliveryMethod || "A combinar")}</p>
+            <p><strong>Pagamento:</strong> ${escapeHtml(customer.paymentPreference || "A combinar")}</p>
+            <p><strong>Endereço/cidade:</strong> ${escapeHtml(customer.address || "A combinar")}</p>
+            <p><strong>Prazo:</strong> ${order.deadline ? formatDate(order.deadline) : "A combinar"}</p>
+          </div>
           <ol class="order-items">
             ${(order.items || [])
               .map((item) => `<li>${Number(item.quantity || 1)}x ${escapeHtml(item.name)} - ${formatPrice(item.subtotal)}</li>`)
               .join("")}
           </ol>
-          <p><strong>Total:</strong> ${formatPrice(order.total)}</p>
           <div class="order-actions">
             <label class="admin-field">
               Status
@@ -310,7 +329,7 @@ function renderOrders() {
             <button class="mini-button" type="button" data-save-order="${escapeHtml(order.id)}">Salvar pedido</button>
             <button class="mini-button" type="button" data-deliver-order="${escapeHtml(order.id)}">Marcar entregue</button>
             <button class="mini-button" type="button" data-copy-whatsapp="${escapeHtml(order.id)}">Copiar WhatsApp</button>
-            <a class="mini-button" href="https://wa.me/${escapeHtml(String(customer.phone || "").replace(/\D/g, ""))}" target="_blank" rel="noreferrer">Abrir WhatsApp</a>
+            <a class="mini-button" href="${escapeHtml(whatsappHref)}" target="_blank" rel="noreferrer">Abrir WhatsApp</a>
           </div>
         </article>
       `;
@@ -495,6 +514,13 @@ productForm.elements.image.addEventListener("input", () => {
 
 orderSearch.addEventListener("input", renderOrders);
 orderFilter.addEventListener("change", renderOrders);
+orderQuickFilters.forEach((button) => {
+  button.addEventListener("click", () => {
+    quickOrderFilter = button.dataset.orderQuickFilter || "";
+    orderQuickFilters.forEach((item) => item.classList.toggle("is-active", item === button));
+    renderOrders();
+  });
+});
 
 document.addEventListener("click", async (event) => {
   const editId = event.target.closest("[data-edit-product]")?.dataset.editProduct;
