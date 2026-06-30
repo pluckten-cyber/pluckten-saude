@@ -1610,6 +1610,59 @@ p {
   transform: rotate(45deg);
 }
 
+.footer-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.footer-social a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid rgba(14, 73, 88, 0.14);
+  border-radius: 999px;
+  background: rgba(238, 249, 248, 0.66);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 900;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.footer-social a:hover {
+  border-color: var(--line-strong);
+  background: rgba(238, 249, 248, 0.94);
+  transform: translateY(-1px);
+}
+
+.footer-social svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.footer-social svg path {
+  fill: currentColor;
+  stroke: none;
+}
+
+.footer-social a:first-child svg path,
+.footer-social a:first-child svg rect,
+.footer-social a:first-child svg circle {
+  fill: none;
+  stroke: currentColor;
+}
+
 @media (max-width: 1080px) {
   .hero,
   .process-section {
