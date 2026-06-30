@@ -330,6 +330,7 @@ function renderOrders() {
             <button class="mini-button" type="button" data-deliver-order="${escapeHtml(order.id)}">Marcar entregue</button>
             <button class="mini-button" type="button" data-copy-whatsapp="${escapeHtml(order.id)}">Copiar WhatsApp</button>
             <a class="mini-button" href="${escapeHtml(whatsappHref)}" target="_blank" rel="noreferrer">Abrir WhatsApp</a>
+            <button class="mini-button danger" type="button" data-delete-order="${escapeHtml(order.id)}">Excluir pedido</button>
           </div>
         </article>
       `;
@@ -528,6 +529,7 @@ document.addEventListener("click", async (event) => {
   const orderId = event.target.closest("[data-save-order]")?.dataset.saveOrder;
   const deliverId = event.target.closest("[data-deliver-order]")?.dataset.deliverOrder;
   const copyId = event.target.closest("[data-copy-whatsapp]")?.dataset.copyWhatsapp;
+  const deleteOrderId = event.target.closest("[data-delete-order]")?.dataset.deleteOrder;
 
   if (event.target.closest("[data-new-product]")) {
     resetProductForm();
@@ -578,6 +580,10 @@ document.addEventListener("click", async (event) => {
     } catch (error) {
       alert("Não consegui copiar automaticamente. Abra o WhatsApp e envie a mensagem manualmente.");
     }
+  }
+  if (deleteOrderId && confirm("Excluir este pedido do painel? Essa ação não pode ser desfeita.")) {
+    await api(`/api/admin/orders/${encodeURIComponent(deleteOrderId)}`, { method: "DELETE" });
+    await loadDashboard();
   }
 });
 

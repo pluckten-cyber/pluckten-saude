@@ -169,6 +169,21 @@ async function saveOrder(order) {
   return order;
 }
 
+async function removeOrder(id) {
+  if (hasSupabase()) {
+    await ensureSupabaseSeed();
+    const supabase = await getSupabase();
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+    if (error) throw new Error(`Supabase delete order: ${error.message}`);
+    return;
+  }
+
+  writeJson(
+    ORDERS_FILE,
+    readJson(ORDERS_FILE, []).filter((order) => order.id !== id),
+  );
+}
+
 function sendJson(res, status, payload, headers = {}) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
@@ -567,6 +582,12 @@ async function handleApi(req, res, pathname) {
       };
       await saveOrder(nextOrder);
       sendJson(res, 200, { order: nextOrder });
+      return true;
+    }
+
+    if (orderMatch && req.method === "DELETE") {
+      await removeOrder(decodeURIComponent(orderMatch[1]));
+      sendJson(res, 200, { ok: true });
       return true;
     }
   } catch (error) {
