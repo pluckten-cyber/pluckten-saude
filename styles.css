@@ -25,10 +25,12 @@
 }
 
 html {
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
 body {
+  overflow-x: hidden;
   min-width: 320px;
   margin: 0;
   background:
@@ -159,7 +161,7 @@ img {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
   align-items: center;
   gap: clamp(28px, 5vw, 78px);
   min-height: calc(100vh - 83px);
@@ -345,8 +347,9 @@ p {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: clamp(360px, 42vw, 520px);
-  aspect-ratio: 4 / 3;
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(340px, 36vw, 460px);
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 28px;
@@ -389,7 +392,7 @@ p {
   z-index: 1;
   display: grid;
   justify-items: center;
-  width: min(78%, 520px);
+  width: min(78%, 500px);
   margin: auto;
   text-align: center;
 }
@@ -404,7 +407,7 @@ p {
 }
 
 .brand-stage img {
-  width: min(100%, 470px);
+  width: min(100%, 430px);
   height: auto;
   object-fit: contain;
   filter:
@@ -421,28 +424,22 @@ p {
   line-height: 1.6;
 }
 
-.stage-highlights {
+.stage-note {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  width: calc(100% - 44px);
-  margin: 0 auto 22px;
-}
-
-.stage-highlights span {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  width: calc(100% - 44px);
+  margin: 0 auto 22px;
   min-height: 42px;
-  padding: 0 10px;
+  padding: 0 18px;
   border: 1px solid rgba(47, 161, 178, 0.12);
   border-radius: 999px;
   background: rgba(238, 249, 248, 0.62);
-  color: var(--text);
+  color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 900;
+  font-weight: 850;
   text-align: center;
 }
 
@@ -1689,10 +1686,10 @@ p {
     font-size: 0.9rem;
   }
 
-  .stage-highlights {
-    grid-template-columns: 1fr;
+  .stage-note {
     width: calc(100% - 28px);
     margin-bottom: 14px;
+    border-radius: 18px;
   }
 
   .product-card {
