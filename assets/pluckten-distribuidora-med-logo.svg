@@ -39,10 +39,10 @@
   </text>
   <text x="322" y="198"
     fill="url(#subGradient)"
-    font-family="Montserrat, Inter, Arial, sans-serif"
-    font-size="32"
-    font-weight="800"
-    letter-spacing="14">
-    DISTRIBUIDORA MED
+    font-family="Trebuchet MS, Segoe UI, Arial, sans-serif"
+    font-size="42"
+    font-weight="700"
+    letter-spacing="4">
+    Distribuidora Med
   </text>
 </svg>
