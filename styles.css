@@ -1450,28 +1450,112 @@ p {
 
 .site-footer {
   display: grid;
-  grid-template-columns: auto minmax(180px, 1fr) auto;
-  align-items: center;
-  gap: 18px;
-  padding: 28px clamp(18px, 4vw, 58px);
+  grid-template-columns: minmax(260px, 1.1fr) repeat(3, minmax(170px, 0.7fr));
+  align-items: start;
+  gap: clamp(22px, 4vw, 58px);
+  padding: clamp(38px, 6vw, 70px) clamp(18px, 4vw, 58px);
   border-top: 1px solid var(--line);
-  background: rgba(232, 247, 247, 0.78);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(184, 237, 137, 0.22), transparent 22rem),
+    radial-gradient(circle at 92% 100%, rgba(82, 205, 226, 0.18), transparent 22rem),
+    rgba(224, 244, 244, 0.88);
 }
 
 .site-footer img {
-  width: min(280px, 100%);
-  height: 72px;
+  width: min(300px, 100%);
+  height: 80px;
   object-fit: contain;
+  object-position: left center;
 }
 
-.site-footer span {
+.footer-brand,
+.footer-column,
+.footer-contact {
+  display: grid;
+  gap: 12px;
+}
+
+.footer-brand p,
+.footer-column p,
+.footer-column a {
+  margin: 0;
   color: var(--muted);
+  line-height: 1.65;
+}
+
+.footer-brand p {
+  max-width: 360px;
+}
+
+.footer-column h3 {
+  margin: 0 0 4px;
+  color: var(--green);
+  font-family: Sora, Manrope, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.footer-column a {
+  width: fit-content;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.footer-column a:hover {
+  color: var(--ink);
+  transform: translateX(2px);
+}
+
+.footer-contact {
+  font-style: normal;
+}
+
+.footer-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px solid rgba(93, 157, 88, 0.22);
+  border-radius: 14px;
+  background: rgba(238, 249, 248, 0.78);
+  color: var(--text);
+  font-weight: 900;
+  box-shadow: 0 16px 35px rgba(37, 104, 114, 0.08);
+}
+
+.footer-seal span {
+  position: relative;
+  width: 20px;
+  height: 22px;
+  border: 2px solid var(--green);
+  border-radius: 10px 10px 12px 12px;
+}
+
+.footer-seal span::after {
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  width: 6px;
+  height: 10px;
+  border-right: 2px solid var(--green);
+  border-bottom: 2px solid var(--green);
+  content: "";
+  transform: rotate(45deg);
 }
 
 @media (max-width: 1080px) {
   .hero,
   .process-section {
     grid-template-columns: 1fr;
+  }
+
+  .site-footer {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero {
