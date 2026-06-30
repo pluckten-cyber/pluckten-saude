@@ -422,21 +422,17 @@ p {
 }
 
 .proof-bar {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
   margin: 0 clamp(18px, 4vw, 58px);
-  overflow: hidden;
+  padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 22px;
-  background: var(--line);
-}
-
-.proof-bar article {
-  min-height: 142px;
-  padding: 22px;
+  border-radius: 999px;
   background:
-    radial-gradient(circle at top right, rgba(121, 215, 234, 0.22), transparent 13rem),
+    linear-gradient(90deg, rgba(238, 249, 248, 0.92), rgba(219, 245, 246, 0.86)),
     rgba(232, 247, 247, 0.82);
 }
 
@@ -446,6 +442,27 @@ p {
   font-size: 0.8rem;
   font-weight: 950;
   letter-spacing: 0.12em;
+}
+
+.proof-bar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid rgba(93, 157, 88, 0.16);
+  border-radius: 999px;
+  background: rgba(247, 255, 254, 0.74);
+  color: var(--text);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.proof-bar span::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  content: "";
 }
 
 .proof-bar strong {
@@ -1576,7 +1593,6 @@ p {
   }
 
   .section-heading,
-  .proof-bar,
   .catalog-tools,
   .guidance-section,
   .guidance-grid,
@@ -1585,10 +1601,6 @@ p {
   .order-status-section,
   .product-grid {
     grid-template-columns: 1fr;
-  }
-
-  .proof-bar article {
-    min-height: auto;
   }
 }
 
