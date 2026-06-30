@@ -23,8 +23,10 @@ const detailImage = document.querySelector("[data-detail-image]");
 const detailCategory = document.querySelector("[data-detail-category]");
 const detailName = document.querySelector("[data-detail-name]");
 const detailDescription = document.querySelector("[data-detail-description]");
+const detailTrust = document.querySelector("[data-detail-trust]");
 const variantPicker = document.querySelector("[data-variant-picker]");
 const detailVariant = document.querySelector("[data-detail-variant]");
+const detailVariantOptions = document.querySelector("[data-detail-variant-options]");
 const detailGrid = document.querySelector("[data-detail-grid]");
 const detailNotes = document.querySelector("[data-detail-notes]");
 const detailPrice = document.querySelector("[data-detail-price]");
@@ -38,6 +40,7 @@ const cartCount = document.querySelector("[data-cart-count]");
 const whatsappLinks = document.querySelectorAll("[data-whatsapp-link]");
 const checkoutModal = document.querySelector("[data-checkout-modal]");
 const checkoutForm = document.querySelector("[data-checkout-form]");
+const checkoutSummary = document.querySelector("[data-checkout-summary]");
 const checkoutStatus = document.querySelector("[data-checkout-status]");
 const statusForm = document.querySelector("[data-status-form]");
 const statusResult = document.querySelector("[data-status-result]");
@@ -84,6 +87,11 @@ function productDisplayStock(product) {
   const variants = getVariants(product);
   if (variants.length === 0) return Number(product.stock || 0);
   return variants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0);
+}
+
+function stockLabel(value) {
+  const stock = Number(value || 0);
+  return stock === 1 ? "1 unidade" : `${stock} unidades`;
 }
 
 function cartKey(id, variantId = "") {
@@ -279,6 +287,61 @@ function productNotes(product) {
   ].filter(([, value]) => value);
 }
 
+function renderDetailGrid(product) {
+  detailGrid.innerHTML = productDetails(product)
+    .map(
+      ([label, value]) => `
+        <div>
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(value)}</dd>
+        </div>
+      `,
+    )
+    .join("");
+}
+
+function renderDetailTrust(product) {
+  const availability = getAvailability(product);
+  const trustItems = [
+    ["Disponibilidade", availabilityLabels[availability]],
+    ["Regularização", product.anvisa ? "ANVISA informada" : "Consultar no atendimento"],
+    ["Compra assistida", "Confirmação antes do pagamento"],
+  ];
+
+  detailTrust.innerHTML = trustItems
+    .map(
+      ([label, value]) => `
+        <span>
+          <small>${escapeHtml(label)}</small>
+          <strong>${escapeHtml(value)}</strong>
+        </span>
+      `,
+    )
+    .join("");
+}
+
+function renderVariantOptions(product) {
+  const variants = getVariants(product);
+  detailVariantOptions.innerHTML = variants
+    .map((variant) => {
+      const selected = variant.id === detailVariant.value;
+      const stockText =
+        getAvailability(product) === "on_request" ? "Estoque sob consulta" : `Estoque: ${stockLabel(variant.stock)}`;
+      return `
+        <button class="variant-option ${selected ? "is-selected" : ""}" type="button" data-select-variant="${escapeHtml(
+          variant.id,
+        )}" aria-pressed="${selected}">
+          <span>
+            <strong>${escapeHtml(variant.name)}</strong>
+            <small>${escapeHtml([variant.sku, stockText].filter(Boolean).join(" - "))}</small>
+          </span>
+          <b>${formatPrice(variant.price)}</b>
+        </button>
+      `;
+    })
+    .join("");
+}
+
 function openProductDetails(id) {
   const product = products.find((item) => item.id === id);
   if (!product) return;
@@ -302,16 +365,9 @@ function openProductDetails(id) {
     .join("");
   detailVariant.value = variants[0]?.id || "";
   detailPrice.textContent = variants.length ? formatPrice(variants[0].price) : formatPrice(product.price);
-  detailGrid.innerHTML = productDetails(product)
-    .map(
-      ([label, value]) => `
-        <div>
-          <dt>${escapeHtml(label)}</dt>
-          <dd>${escapeHtml(value)}</dd>
-        </div>
-      `,
-    )
-    .join("");
+  renderDetailTrust(product);
+  renderVariantOptions(product);
+  renderDetailGrid(product);
   const notes = productNotes(product);
   detailNotes.hidden = notes.length === 0;
   detailNotes.innerHTML = notes
@@ -337,16 +393,8 @@ function updateDetailVariant() {
   if (!product) return;
   const variant = findVariant(product, detailVariant.value);
   detailPrice.textContent = formatPrice(variant?.price ?? product.price);
-  detailGrid.innerHTML = productDetails(product)
-    .map(
-      ([label, value]) => `
-        <div>
-          <dt>${escapeHtml(label)}</dt>
-          <dd>${escapeHtml(value)}</dd>
-        </div>
-      `,
-    )
-    .join("");
+  renderVariantOptions(product);
+  renderDetailGrid(product);
 }
 
 function closeProductDetails() {
@@ -381,6 +429,66 @@ function cartPayload() {
   });
 }
 
+function cartLineItems() {
+  return [...cart.entries()]
+    .map(([key, quantity]) => {
+      const { id, variantId } = parseCartKey(key);
+      const product = products.find((item) => item.id === id);
+      if (!product) return null;
+      const variant = findVariant(product, variantId);
+      const price = variant ? variant.price : product.price;
+      const label = variant ? `${product.name} - ${variant.name}` : product.name;
+      return {
+        key,
+        product,
+        variant,
+        label,
+        price,
+        quantity,
+        subtotal: price * quantity,
+      };
+    })
+    .filter(Boolean);
+}
+
+function renderCheckoutSummary() {
+  if (!checkoutSummary) return;
+  const lines = cartLineItems();
+  const summary = getCartSummary();
+
+  if (lines.length === 0) {
+    checkoutSummary.innerHTML = "";
+    return;
+  }
+
+  checkoutSummary.innerHTML = `
+    <div class="checkout-summary-head">
+      <span>Resumo da cotação</span>
+      <strong>${summary.count} ${summary.count === 1 ? "item" : "itens"}</strong>
+    </div>
+    <div class="checkout-summary-list">
+      ${lines
+        .map(
+          (line) => `
+            <article>
+              <div>
+                <strong>${escapeHtml(line.label)}</strong>
+                <small>${line.quantity} x ${formatPrice(line.price)}</small>
+              </div>
+              <b>${formatPrice(line.subtotal)}</b>
+            </article>
+          `,
+        )
+        .join("")}
+    </div>
+    <div class="checkout-summary-total">
+      <span>Total estimado</span>
+      <strong>${formatPrice(summary.total)}</strong>
+    </div>
+    <p>Estoque, prazo, marca, frete e pagamento serão confirmados pela Pluckten antes de fechar.</p>
+  `;
+}
+
 function renderCart() {
   const rows = [...cart.entries()]
     .map(([key, quantity]) => {
@@ -395,7 +503,7 @@ function renderCart() {
         <article class="cart-row">
           <div>
             <h3>${escapeHtml(label)}</h3>
-            <p>${formatPrice(price)} cada</p>
+            <p>${formatPrice(price)} cada - subtotal ${formatPrice(price * quantity)}</p>
           </div>
           <div class="qty-control" aria-label="Quantidade de ${escapeHtml(label)}">
             <button type="button" data-decrease="${escapeHtml(key)}" aria-label="Diminuir">−</button>
@@ -413,6 +521,7 @@ function renderCart() {
   cartTotal.textContent = formatPrice(summary.total);
   cartEmpty.hidden = summary.count > 0;
   cartFooter.hidden = summary.count === 0;
+  renderCheckoutSummary();
 }
 
 function addToCart(id, variantId = "") {
@@ -459,6 +568,7 @@ function openCheckout() {
   if (cart.size === 0) return;
   checkoutStatus.textContent = "";
   checkoutStatus.classList.remove("is-error", "is-success");
+  renderCheckoutSummary();
   checkoutModal.classList.add("is-open");
   checkoutModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("cart-open");
@@ -558,6 +668,7 @@ document.addEventListener("click", (event) => {
   const viewButton = event.target.closest("[data-view-product]");
   const increaseButton = event.target.closest("[data-increase]");
   const decreaseButton = event.target.closest("[data-decrease]");
+  const variantButton = event.target.closest("[data-select-variant]");
 
   if (addButton) {
     const added = addToCart(addButton.dataset.addProduct);
@@ -567,6 +678,12 @@ document.addEventListener("click", (event) => {
 
   if (viewButton) {
     openProductDetails(viewButton.dataset.viewProduct);
+    return;
+  }
+
+  if (variantButton) {
+    detailVariant.value = variantButton.dataset.selectVariant;
+    updateDetailVariant();
     return;
   }
 

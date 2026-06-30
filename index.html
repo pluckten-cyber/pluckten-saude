@@ -233,9 +233,11 @@
           <span class="tag" data-detail-category></span>
           <h2 data-detail-name></h2>
           <p data-detail-description></p>
+          <div class="detail-trust" data-detail-trust></div>
           <label class="variant-picker" data-variant-picker hidden>
             Escolha a opção
             <select data-detail-variant></select>
+            <div class="variant-options" data-detail-variant-options></div>
           </label>
           <dl class="detail-grid" data-detail-grid></dl>
           <div class="detail-notes" data-detail-notes hidden></div>
@@ -288,6 +290,8 @@
           </div>
           <button class="icon-button" type="button" data-checkout-close aria-label="Fechar formulário">×</button>
         </div>
+
+        <section class="checkout-summary" data-checkout-summary aria-label="Resumo do pedido"></section>
 
         <label>
           Nome completo
