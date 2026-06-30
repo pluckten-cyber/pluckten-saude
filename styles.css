@@ -342,9 +342,10 @@ p {
 
 .brand-stage {
   position: relative;
-  display: grid;
-  place-items: center;
-  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: clamp(360px, 42vw, 520px);
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -371,15 +372,78 @@ p {
     );
 }
 
-.brand-stage img {
+.brand-stage::after {
+  position: absolute;
+  right: -18%;
+  bottom: -24%;
+  width: 72%;
+  aspect-ratio: 1;
+  content: "";
+  border: 1px solid rgba(47, 161, 178, 0.1);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(121, 215, 234, 0.22), transparent 66%);
+}
+
+.brand-stage-main {
   position: relative;
-  width: min(82%, 760px);
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: min(78%, 520px);
+  margin: auto;
+  text-align: center;
+}
+
+.brand-stage-main span {
+  margin-bottom: 18px;
+  color: var(--green-strong);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.brand-stage img {
+  width: min(100%, 470px);
   height: auto;
   object-fit: contain;
   filter:
     saturate(1.02)
     contrast(1.03)
     drop-shadow(0 18px 28px rgba(18, 93, 112, 0.12));
+}
+
+.brand-stage-main p {
+  max-width: 430px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.stage-highlights {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: calc(100% - 44px);
+  margin: 0 auto 22px;
+}
+
+.stage-highlights span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid rgba(47, 161, 178, 0.12);
+  border-radius: 999px;
+  background: rgba(238, 249, 248, 0.62);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-align: center;
 }
 
 .stage-card {
@@ -1605,20 +1669,30 @@ p {
   }
 
   .brand-stage {
-    min-height: 300px;
+    min-height: 360px;
     border-radius: 22px;
   }
 
-  .brand-stage img {
-    width: 100%;
-    border-radius: 0;
+  .brand-stage-main {
+    width: min(84%, 420px);
   }
 
-  .stage-card {
-    left: 14px;
-    right: 14px;
-    bottom: 14px;
-    width: auto;
+  .brand-stage-main span {
+    margin-bottom: 14px;
+  }
+
+  .brand-stage img {
+    width: min(100%, 380px);
+  }
+
+  .brand-stage-main p {
+    font-size: 0.9rem;
+  }
+
+  .stage-highlights {
+    grid-template-columns: 1fr;
+    width: calc(100% - 28px);
+    margin-bottom: 14px;
   }
 
   .product-card {
