@@ -413,7 +413,7 @@ function orderMessage(order) {
   const payment = customer.paymentPreference || "A combinar";
 
   return [
-    `Olá, ${customer.name || "tudo bem"}! Aqui é da Pluckten Saúde.`,
+    `Olá, ${customer.name || "tudo bem"}! Aqui é da Pluckten Distribuidora Med.`,
     `Recebemos o pedido ${order.id}.`,
     "",
     "Itens:",

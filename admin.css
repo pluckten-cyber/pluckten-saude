@@ -21,7 +21,8 @@
 }
 
 .login-card img {
-  width: 220px;
+  width: min(330px, 100%);
+  border-radius: 12px;
 }
 
 .login-card h1,

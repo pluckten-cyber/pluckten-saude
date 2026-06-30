@@ -51,7 +51,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Pluckten Saúde rodando em http://127.0.0.1:${PORT}`);
+  console.log(`Pluckten Distribuidora Med rodando em http://127.0.0.1:${PORT}`);
   console.log(`Admin: http://127.0.0.1:${PORT}/admin.html`);
   console.log(`Senha admin inicial: ${process.env.PLUCKTEN_ADMIN_PASSWORD || "pluckten123"}`);
 });

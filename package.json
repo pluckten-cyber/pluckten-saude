@@ -1,8 +1,8 @@
 {
-  "name": "pluckten-saude",
+  "name": "pluckten-distribuidora-med",
   "version": "1.0.0",
   "private": true,
-  "description": "Loja e painel administrativo da Pluckten Saúde.",
+  "description": "Loja e painel administrativo da Pluckten Distribuidora Med.",
   "scripts": {
     "dev": "node server.js",
     "check": "node --check server.js && node --check server-core.js && node --check script.js && node --check admin.js"

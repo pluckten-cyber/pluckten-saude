@@ -1,4 +1,4 @@
-# Deploy da Pluckten Saúde com Vercel + Supabase
+# Deploy da Pluckten Distribuidora Med com Vercel + Supabase
 
 Este projeto roda com:
 

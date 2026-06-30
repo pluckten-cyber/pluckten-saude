@@ -111,7 +111,7 @@ function orderWhatsAppMessage(order) {
   const customer = order.customer || {};
 
   return [
-    "Olá, Pluckten Saúde! Acabei de enviar uma cotação pelo site.",
+    "Olá, Pluckten Distribuidora Med! Acabei de enviar uma cotação pelo site.",
     `Pedido: ${order.id}`,
     `Nome: ${customer.name || ""}`,
     `WhatsApp: ${customer.phone || ""}`,
@@ -126,7 +126,7 @@ function orderWhatsAppMessage(order) {
 
 function setContactLinks() {
   whatsappLinks.forEach((link) => {
-    link.href = getWhatsAppUrl("Olá, Pluckten Saúde! Quero saber mais sobre os produtos disponíveis.");
+    link.href = getWhatsAppUrl("Olá, Pluckten Distribuidora Med! Quero saber mais sobre os produtos disponíveis.");
   });
 }
 
@@ -143,7 +143,7 @@ async function loadProducts() {
     productGrid.innerHTML = `
       <div class="empty-state">
         <strong>Não foi possível carregar o catálogo.</strong>
-        <p>Confira se o servidor da Pluckten Saúde está rodando.</p>
+        <p>Confira se o servidor da Pluckten Distribuidora Med está rodando.</p>
       </div>
     `;
   }
