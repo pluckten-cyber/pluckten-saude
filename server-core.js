@@ -11,9 +11,31 @@ const ADMIN_PASSWORD = process.env.PLUCKTEN_ADMIN_PASSWORD || "pluckten123";
 const COOKIE_NAME = "pluckten_session";
 const SESSION_MAX_AGE = 60 * 60 * 24;
 const SUPABASE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || "product-images";
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_BLOCK_MS = 10 * 60 * 1000;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
 let supabaseClient;
 let seedReady;
+const loginAttempts = new Map();
+
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Content-Security-Policy": [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "connect-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join("; "),
+};
 
 function hasSupabase() {
   return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -90,6 +112,7 @@ async function listProducts({ includeInactive = false } = {}) {
 }
 
 async function saveProduct(product) {
+  validateProductImage(product.image);
   if (hasSupabase()) {
     await ensureSupabaseSeed();
     const supabase = await getSupabase();
@@ -186,6 +209,7 @@ async function removeOrder(id) {
 
 function sendJson(res, status, payload, headers = {}) {
   res.writeHead(status, {
+    ...SECURITY_HEADERS,
     "Content-Type": "application/json; charset=utf-8",
     ...headers,
   });
@@ -232,6 +256,35 @@ function requireAuth(req, res) {
 function cookieSecureAttribute(req) {
   const host = req.headers.host || "";
   return host.startsWith("127.0.0.1") || host.startsWith("localhost") ? "" : "; Secure";
+}
+
+function clientIp(req) {
+  return String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "local")
+    .split(",")[0]
+    .trim();
+}
+
+function loginState(req) {
+  const key = clientIp(req);
+  const current = loginAttempts.get(key) || { count: 0, blockedUntil: 0 };
+  if (current.blockedUntil && current.blockedUntil < Date.now()) {
+    loginAttempts.delete(key);
+    return { key, count: 0, blockedUntil: 0 };
+  }
+  return { key, ...current };
+}
+
+function registerLoginFailure(req) {
+  const state = loginState(req);
+  const count = state.count + 1;
+  loginAttempts.set(state.key, {
+    count,
+    blockedUntil: count >= MAX_LOGIN_ATTEMPTS ? Date.now() + LOGIN_BLOCK_MS : 0,
+  });
+}
+
+function clearLoginFailures(req) {
+  loginAttempts.delete(clientIp(req));
 }
 
 function readBody(req) {
@@ -347,9 +400,21 @@ function extensionFromMime(mimeType) {
   return "jpg";
 }
 
+function validateProductImage(value) {
+  const parsed = parseDataUrl(value);
+  if (!parsed) return;
+  if (!ALLOWED_IMAGE_TYPES.has(String(parsed.mimeType || "").toLowerCase())) {
+    throw new Error("Formato de imagem inválido. Use PNG, JPG, WEBP ou GIF.");
+  }
+  if (!parsed.buffer.length || parsed.buffer.length > MAX_BODY_SIZE) {
+    throw new Error("Imagem inválida ou muito grande.");
+  }
+}
+
 async function uploadProductImage(product) {
   const parsed = parseDataUrl(product.image);
   if (!parsed) return product;
+  validateProductImage(product.image);
 
   const supabase = await getSupabase();
   const extension = extensionFromMime(parsed.mimeType);
@@ -382,7 +447,7 @@ function phonesMatch(a, b) {
 }
 
 function publicProduct(product) {
-  const { cost, ...safeProduct } = product || {};
+  const { cost, history, ...safeProduct } = product || {};
   return safeProduct;
 }
 
@@ -406,6 +471,14 @@ function publicOrder(order) {
       subtotal: item.subtotal,
     })),
     total: order.total,
+  };
+}
+
+function productHistoryEntry(title, detail = "") {
+  return {
+    at: new Date().toISOString(),
+    title,
+    detail,
   };
 }
 
@@ -509,12 +582,21 @@ async function handleApi(req, res, pathname) {
     }
 
     if (req.method === "POST" && pathname === "/api/admin/login") {
+      const attempt = loginState(req);
+      if (attempt.blockedUntil && attempt.blockedUntil > Date.now()) {
+        const minutes = Math.ceil((attempt.blockedUntil - Date.now()) / 60000);
+        sendJson(res, 429, { error: `Muitas tentativas. Tente novamente em ${minutes} min.` });
+        return true;
+      }
+
       const body = await readBody(req);
       if (String(body.password || "") !== ADMIN_PASSWORD) {
+        registerLoginFailure(req);
         sendJson(res, 401, { error: "Senha inválida." });
         return true;
       }
 
+      clearLoginFailures(req);
       const timestamp = Math.floor(Date.now() / 1000);
       const token = `${timestamp}.${signSession(timestamp)}`;
       sendJson(res, 200, { ok: true }, {
@@ -539,6 +621,15 @@ async function handleApi(req, res, pathname) {
       return true;
     }
 
+    if (req.method === "GET" && pathname === "/api/admin/backup") {
+      sendJson(res, 200, {
+        exportedAt: new Date().toISOString(),
+        products: await listProducts({ includeInactive: true }),
+        orders: await listOrders(),
+      });
+      return true;
+    }
+
     if (req.method === "GET" && pathname === "/api/admin/products") {
       sendJson(res, 200, { products: await listProducts({ includeInactive: true }) });
       return true;
@@ -550,6 +641,7 @@ async function handleApi(req, res, pathname) {
       if (products.some((item) => item.id === product.id)) {
         throw new Error("Já existe produto com esse identificador.");
       }
+      product.history = [productHistoryEntry("Produto criado", "Cadastro realizado pelo painel admin.")];
       await saveProduct(product);
       sendJson(res, 201, { product });
       return true;
@@ -559,9 +651,13 @@ async function handleApi(req, res, pathname) {
     if (productMatch && req.method === "PUT") {
       const products = await listProducts({ includeInactive: true });
       const id = decodeURIComponent(productMatch[1]);
-      if (!products.some((product) => product.id === id)) throw new Error("Produto não encontrado.");
+      const currentProduct = products.find((product) => product.id === id);
+      if (!currentProduct) throw new Error("Produto não encontrado.");
 
       const product = normalizeProduct(await readBody(req), id);
+      const history = Array.isArray(currentProduct.history) ? [...currentProduct.history] : [];
+      history.push(productHistoryEntry("Produto atualizado", "Cadastro alterado pelo painel admin."));
+      product.history = history;
       await saveProduct(product);
       sendJson(res, 200, { product });
       return true;
@@ -635,4 +731,5 @@ module.exports = {
   handleApi,
   readJson,
   ROOT,
+  SECURITY_HEADERS,
 };

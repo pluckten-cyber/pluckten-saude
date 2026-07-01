@@ -1,7 +1,7 @@
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
-const { handleApi, ROOT } = require("./server-core");
+const { handleApi, ROOT, SECURITY_HEADERS } = require("./server-core");
 
 const PORT = Number(process.env.PORT || 4173);
 
@@ -36,6 +36,7 @@ function serveStatic(res, pathname) {
     }
 
     res.writeHead(200, {
+      ...SECURITY_HEADERS,
       "Content-Type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
     });
     res.end(data);

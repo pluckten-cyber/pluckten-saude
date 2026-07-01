@@ -24,6 +24,7 @@ const statOverdue = document.querySelector("[data-stat-overdue]");
 const statLowStock = document.querySelector("[data-stat-low-stock]");
 const statExpiring = document.querySelector("[data-stat-expiring]");
 const exportOrdersButton = document.querySelector("[data-export-orders]");
+const exportBackupButton = document.querySelector("[data-export-backup]");
 
 let products = [];
 let orders = [];
@@ -377,6 +378,7 @@ function renderProducts() {
           ${variants.length ? `<p>${variants.length} variação${variants.length > 1 ? "ões" : ""} cadastrada${variants.length > 1 ? "s" : ""}</p>` : ""}
           ${product.brand || product.sku ? `<p>${escapeHtml(product.brand || "Sem marca")} • ${escapeHtml(product.sku || "sem SKU")}</p>` : ""}
           <p>${variants.length ? "A partir de " : ""}${formatPrice(productDisplayPrice(product))}</p>
+          ${renderProductHistory(product)}
           <div class="mini-actions">
             <button class="mini-button" type="button" data-edit-product="${escapeHtml(product.id)}">Editar</button>
             <button class="mini-button danger" type="button" data-delete-product="${escapeHtml(product.id)}">Excluir</button>
@@ -662,6 +664,32 @@ function renderOrderHistory(order) {
   `;
 }
 
+function renderProductHistory(product) {
+  const history = Array.isArray(product.history) ? product.history : [];
+  if (history.length === 0) return "";
+
+  return `
+    <details class="order-history product-history">
+      <summary>Histórico do produto</summary>
+      <ol>
+        ${history
+          .slice()
+          .reverse()
+          .map(
+            (entry) => `
+              <li>
+                <strong>${escapeHtml(entry.title || "Atualização")}</strong>
+                <span>${new Date(entry.at || Date.now()).toLocaleString("pt-BR")}</span>
+                ${entry.detail ? `<p>${escapeHtml(entry.detail)}</p>` : ""}
+              </li>
+            `,
+          )
+          .join("")}
+      </ol>
+    </details>
+  `;
+}
+
 async function copyOrderMessage(orderId) {
   const order = orders.find((item) => item.id === orderId);
   if (!order) return;
@@ -684,6 +712,17 @@ async function updateOrder(orderId, patch = {}) {
 
 function csvCell(value) {
   return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function exportOrdersCsv() {
@@ -712,14 +751,13 @@ function exportOrdersCsv() {
 
   const csv = rows.map((row) => row.map(csvCell).join(";")).join("\n");
   const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `pedidos-pluckten-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(`pedidos-pluckten-${new Date().toISOString().slice(0, 10)}.csv`, blob);
+}
+
+async function exportBackupJson() {
+  const backup = await api("/api/admin/backup");
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json;charset=utf-8" });
+  downloadBlob(`backup-pluckten-${new Date().toISOString().slice(0, 10)}.json`, blob);
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -774,6 +812,9 @@ productSearch.addEventListener("input", renderProducts);
 productCategoryFilter.addEventListener("change", renderProducts);
 productStockFilter.addEventListener("change", renderProducts);
 exportOrdersButton.addEventListener("click", exportOrdersCsv);
+exportBackupButton.addEventListener("click", () => {
+  exportBackupJson().catch((error) => alert(error.message));
+});
 orderQuickFilters.forEach((button) => {
   button.addEventListener("click", () => {
     quickOrderFilter = button.dataset.orderQuickFilter || "";
