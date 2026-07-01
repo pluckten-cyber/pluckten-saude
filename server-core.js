@@ -413,8 +413,8 @@ async function createOrder(payload) {
       if (!product) return null;
       const variants = Array.isArray(product.variants) ? product.variants : [];
       const variant = item.variantId ? variants.find((entry) => entry.id === item.variantId) : null;
-      if (variants.length > 0 && !variant) return null;
-      const itemName = variant ? `${product.name} - ${variant.name}` : product.name;
+      if (item.variantId && !variant) return null;
+      const itemName = variant ? `${product.name} - ${variant.name}` : variants.length ? `${product.name} - Kit padrão` : product.name;
       const itemPrice = variant ? variant.price : product.price;
 
       return {

@@ -77,16 +77,46 @@ function findVariant(product, variantId) {
   return getVariants(product).find((variant) => variant.id === variantId) || null;
 }
 
+function productChoices(product) {
+  const baseChoice = {
+    id: "",
+    name: "Kit padrão",
+    detail: product.pack || product.sku || "Opção principal",
+    price: Number(product.price || 0),
+    stock: Number(product.stock || 0),
+    sku: product.sku || "",
+    isBase: true,
+  };
+
+  return [
+    baseChoice,
+    ...getVariants(product).map((variant) => ({
+      id: variant.id,
+      name: variant.name,
+      detail: variant.sku || "Variação",
+      price: Number(variant.price || 0),
+      stock: Number(variant.stock || 0),
+      sku: variant.sku || "",
+      isBase: false,
+    })),
+  ];
+}
+
+function findChoice(product, choiceId) {
+  if (!choiceId) return productChoices(product)[0] || null;
+  return productChoices(product).find((choice) => choice.id === choiceId) || null;
+}
+
 function productDisplayPrice(product) {
   const variants = getVariants(product);
   if (variants.length === 0) return Number(product.price || 0);
-  return Math.min(...variants.map((variant) => Number(variant.price || 0)));
+  return Math.min(...productChoices(product).map((choice) => Number(choice.price || 0)));
 }
 
 function productDisplayStock(product) {
   const variants = getVariants(product);
   if (variants.length === 0) return Number(product.stock || 0);
-  return variants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0);
+  return productChoices(product).reduce((sum, choice) => sum + Number(choice.stock || 0), 0);
 }
 
 function stockLabel(value) {
@@ -130,6 +160,40 @@ function orderWhatsAppMessage(order) {
     `Total estimado: ${formatPrice(order.total)}`,
     "Podem confirmar estoque, prazo e pagamento?",
   ].join("\n");
+}
+
+const statusSteps = ["novo", "confirmado", "separando", "enviado", "entregue"];
+
+const statusText = {
+  novo: "Pedido recebido",
+  confirmado: "Confirmado",
+  separando: "Em separação",
+  enviado: "Saiu para entrega",
+  entregue: "Entregue",
+  cancelado: "Cancelado",
+};
+
+function renderStatusTimeline(status) {
+  const normalized = String(status || "novo").toLowerCase();
+  if (normalized === "cancelado") {
+    return `
+      <div class="status-timeline is-canceled">
+        <span class="is-current">Pedido cancelado</span>
+      </div>
+    `;
+  }
+
+  const currentIndex = Math.max(0, statusSteps.indexOf(normalized));
+  return `
+    <div class="status-timeline">
+      ${statusSteps
+        .map((step, index) => {
+          const state = index < currentIndex ? "is-done" : index === currentIndex ? "is-current" : "";
+          return `<span class="${state}">${escapeHtml(statusText[step])}</span>`;
+        })
+        .join("")}
+    </div>
+  `;
 }
 
 function setContactLinks() {
@@ -266,6 +330,7 @@ function renderProducts() {
 
 function productDetails(product) {
   const selectedVariant = findVariant(product, detailVariant.value);
+  const selectedChoice = findChoice(product, detailVariant.value);
   return [
     ["Marca", product.brand],
     ["SKU", selectedVariant?.sku || product.sku],
@@ -280,7 +345,7 @@ function productDetails(product) {
         ? "Sob consulta"
         : selectedVariant
           ? Number(selectedVariant.stock || 0)
-          : productDisplayStock(product),
+          : Number(selectedChoice?.stock ?? product.stock ?? 0),
     ],
   ].filter(([, value]) => value !== undefined && value !== null && value !== "");
 }
@@ -326,21 +391,21 @@ function renderDetailTrust(product) {
 }
 
 function renderVariantOptions(product) {
-  const variants = getVariants(product);
-  detailVariantOptions.innerHTML = variants
-    .map((variant) => {
-      const selected = variant.id === detailVariant.value;
+  const choices = productChoices(product);
+  detailVariantOptions.innerHTML = choices
+    .map((choice) => {
+      const selected = choice.id === detailVariant.value;
       const stockText =
-        getAvailability(product) === "on_request" ? "Estoque sob consulta" : `Estoque: ${stockLabel(variant.stock)}`;
+        getAvailability(product) === "on_request" ? "Estoque sob consulta" : `Estoque: ${stockLabel(choice.stock)}`;
       return `
-        <button class="variant-option ${selected ? "is-selected" : ""}" type="button" data-select-variant="${escapeHtml(
-          variant.id,
-        )}" aria-pressed="${selected}">
+        <button class="variant-option ${choice.isBase ? "is-base" : ""} ${
+          selected ? "is-selected" : ""
+        }" type="button" data-select-variant="${escapeHtml(choice.id)}" aria-pressed="${selected}">
           <span>
-            <strong>${escapeHtml(variant.name)}</strong>
-            <small>${escapeHtml([variant.sku, stockText].filter(Boolean).join(" - "))}</small>
+            <strong>${escapeHtml(choice.name)}</strong>
+            <small>${escapeHtml([choice.detail, stockText].filter(Boolean).join(" - "))}</small>
           </span>
-          <b>${formatPrice(variant.price)}</b>
+          <b>${formatPrice(choice.price)}</b>
         </button>
       `;
     })
@@ -351,6 +416,7 @@ function openProductDetails(id) {
   const product = products.find((item) => item.id === id);
   if (!product) return;
   const variants = getVariants(product);
+  const choices = productChoices(product);
 
   selectedProductId = id;
   detailImage.src = product.image;
@@ -359,17 +425,20 @@ function openProductDetails(id) {
   detailName.textContent = product.name;
   detailDescription.textContent = product.description || "";
   variantPicker.hidden = variants.length === 0;
-  detailVariant.innerHTML = variants
-    .map(
-      (variant) => `
-        <option value="${escapeHtml(variant.id)}">
-          ${escapeHtml(variant.name)} - ${formatPrice(variant.price)}
+  detailVariant.innerHTML =
+    variants.length > 0
+      ? choices
+          .map(
+            (choice) => `
+        <option value="${escapeHtml(choice.id)}">
+          ${escapeHtml(choice.name)} - ${formatPrice(choice.price)}
         </option>
       `,
-    )
-    .join("");
-  detailVariant.value = variants[0]?.id || "";
-  detailPrice.textContent = variants.length ? formatPrice(variants[0].price) : formatPrice(product.price);
+          )
+          .join("")
+      : "";
+  detailVariant.value = "";
+  detailPrice.textContent = formatPrice(product.price);
   renderDetailTrust(product);
   renderVariantOptions(product);
   renderDetailGrid(product);
@@ -386,7 +455,7 @@ function openProductDetails(id) {
     )
     .join("");
   detailAdd.disabled = getAvailability(product) === "unavailable";
-  detailAdd.textContent = variants.length ? "Adicionar opção" : getAvailability(product) === "on_request" ? "Consultar" : "Adicionar";
+  detailAdd.textContent = variants.length ? "Adicionar seleção" : getAvailability(product) === "on_request" ? "Consultar" : "Adicionar";
 
   productModal.classList.add("is-open");
   productModal.setAttribute("aria-hidden", "false");
@@ -396,8 +465,9 @@ function openProductDetails(id) {
 function updateDetailVariant() {
   const product = products.find((item) => item.id === selectedProductId);
   if (!product) return;
-  const variant = findVariant(product, detailVariant.value);
-  detailPrice.textContent = formatPrice(variant?.price ?? product.price);
+  const choice = findChoice(product, detailVariant.value);
+  detailPrice.textContent = formatPrice(choice?.price ?? product.price);
+  detailAdd.textContent = getVariants(product).length && !detailVariant.value ? "Adicionar kit" : "Adicionar seleção";
   renderVariantOptions(product);
   renderDetailGrid(product);
 }
@@ -434,6 +504,11 @@ function cartPayload() {
   });
 }
 
+function cartItemLabel(product, variant) {
+  if (variant) return `${product.name} - ${variant.name}`;
+  return getVariants(product).length ? `${product.name} - Kit padrão` : product.name;
+}
+
 function cartLineItems() {
   return [...cart.entries()]
     .map(([key, quantity]) => {
@@ -442,7 +517,7 @@ function cartLineItems() {
       if (!product) return null;
       const variant = findVariant(product, variantId);
       const price = variant ? variant.price : product.price;
-      const label = variant ? `${product.name} - ${variant.name}` : product.name;
+      const label = cartItemLabel(product, variant);
       return {
         key,
         product,
@@ -502,7 +577,7 @@ function renderCart() {
       if (!product) return "";
       const variant = findVariant(product, variantId);
       const price = variant ? variant.price : product.price;
-      const label = variant ? `${product.name} - ${variant.name}` : product.name;
+      const label = cartItemLabel(product, variant);
 
       return `
         <article class="cart-row">
@@ -533,7 +608,7 @@ function addToCart(id, variantId = "") {
   const product = products.find((item) => item.id === id);
   if (!product || getAvailability(product) === "unavailable") return;
   const variants = getVariants(product);
-  if (variants.length > 0 && !findVariant(product, variantId)) {
+  if (variants.length > 0 && variantId && !findVariant(product, variantId)) {
     openProductDetails(id);
     return false;
   }
@@ -645,16 +720,23 @@ async function submitStatusSearch(event) {
 
     const order = data.order;
     const deadline = order.deadline ? formatDate(order.deadline) : "A combinar";
+    const statusLabel = statusText[String(order.status || "novo").toLowerCase()] || order.status;
     statusResult.innerHTML = `
       <article class="status-summary">
-        <div>
-          <span class="stock-badge">${escapeHtml(order.status)}</span>
-          <strong>${escapeHtml(order.id)}</strong>
+        <div class="status-summary-head">
+          <div>
+            <span class="stock-badge">${escapeHtml(statusLabel)}</span>
+            <strong>${escapeHtml(order.id)}</strong>
+          </div>
+          <small>Atualizado em ${new Date(order.updatedAt || order.createdAt).toLocaleDateString("pt-BR")}</small>
         </div>
-        <p><strong>Total:</strong> ${formatPrice(order.total)}</p>
-        <p><strong>Entrega:</strong> ${escapeHtml(order.deliveryMethod || "A combinar")}</p>
-        <p><strong>Pagamento:</strong> ${escapeHtml(order.paymentPreference || "A combinar")}</p>
-        <p><strong>Prazo:</strong> ${escapeHtml(deadline)}</p>
+        ${renderStatusTimeline(order.status)}
+        <div class="status-meta-grid">
+          <p><strong>Total:</strong> ${formatPrice(order.total)}</p>
+          <p><strong>Entrega:</strong> ${escapeHtml(order.deliveryMethod || "A combinar")}</p>
+          <p><strong>Pagamento:</strong> ${escapeHtml(order.paymentPreference || "A combinar")}</p>
+          <p><strong>Prazo:</strong> ${escapeHtml(deadline)}</p>
+        </div>
         <ol>
           ${(order.items || [])
             .map((item) => `<li>${Number(item.quantity || 1)}x ${escapeHtml(item.name)} - ${formatPrice(item.subtotal)}</li>`)
@@ -676,6 +758,11 @@ document.addEventListener("click", (event) => {
   const variantButton = event.target.closest("[data-select-variant]");
 
   if (addButton) {
+    const product = products.find((item) => item.id === addButton.dataset.addProduct);
+    if (getVariants(product || {}).length) {
+      openProductDetails(addButton.dataset.addProduct);
+      return;
+    }
     const added = addToCart(addButton.dataset.addProduct);
     if (added && !addButton.disabled) openCart();
     return;
