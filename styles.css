@@ -699,15 +699,6 @@ p {
     linear-gradient(135deg, rgba(238, 249, 248, 0.68), transparent);
 }
 
-.product-image-shell::after {
-  position: absolute;
-  inset: 12px;
-  content: "";
-  border: 1px solid rgba(255, 255, 255, 0.44);
-  border-radius: 14px;
-  pointer-events: none;
-}
-
 .product-image {
   position: relative;
   width: 100%;
