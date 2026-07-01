@@ -1034,8 +1034,21 @@ p {
 }
 
 .variant-option b {
-  color: var(--green);
+  min-width: 86px;
+  padding: 8px 10px;
+  border: 1px solid rgba(93, 157, 88, 0.18);
+  border-radius: 999px;
+  background: rgba(189, 230, 142, 0.2);
+  color: var(--green-strong);
   font-family: Sora, Manrope, sans-serif;
+  font-size: 0.96rem;
+  font-weight: 950;
+  text-align: center;
+}
+
+.variant-option.is-selected b {
+  background: rgba(74, 141, 83, 0.12);
+  color: #2f703b;
 }
 
 .detail-copy .product-footer {
