@@ -5,16 +5,25 @@ const loginMessage = document.querySelector("[data-login-message]");
 const productForm = document.querySelector("[data-product-form]");
 const productMessage = document.querySelector("[data-product-message]");
 const productList = document.querySelector("[data-product-list]");
+const productSearch = document.querySelector("[data-product-search]");
+const productCategoryFilter = document.querySelector("[data-product-category-filter]");
+const productStockFilter = document.querySelector("[data-product-stock-filter]");
 const orderList = document.querySelector("[data-order-list]");
 const orderSearch = document.querySelector("[data-order-search]");
 const orderFilter = document.querySelector("[data-order-filter]");
 const orderQuickFilters = document.querySelectorAll("[data-order-quick-filter]");
+const adminAlerts = document.querySelector("[data-admin-alerts]");
 const imagePreview = document.querySelector("[data-image-preview]");
 const variantList = document.querySelector("[data-variant-list]");
 const statOrders = document.querySelector("[data-stat-orders]");
 const statProducts = document.querySelector("[data-stat-products]");
 const statOpen = document.querySelector("[data-stat-open]");
 const statRevenue = document.querySelector("[data-stat-revenue]");
+const statToday = document.querySelector("[data-stat-today]");
+const statOverdue = document.querySelector("[data-stat-overdue]");
+const statLowStock = document.querySelector("[data-stat-low-stock]");
+const statExpiring = document.querySelector("[data-stat-expiring]");
+const exportOrdersButton = document.querySelector("[data-export-orders]");
 
 let products = [];
 let orders = [];
@@ -38,6 +47,8 @@ const availabilityLabels = {
 };
 
 const orderStatuses = ["novo", "confirmado", "separando", "enviado", "entregue", "cancelado"];
+const LOW_STOCK_LIMIT = 5;
+const EXPIRING_DAYS = 120;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -97,10 +108,67 @@ function getAvailability(product) {
   return availabilityLabels[product.availability] ? product.availability : "in_stock";
 }
 
+function getVariants(product) {
+  return Array.isArray(product.variants) ? product.variants : [];
+}
+
+function productChoices(product) {
+  return [
+    { name: "Kit padrão", price: Number(product.price || 0), stock: Number(product.stock || 0), sku: product.sku || "" },
+    ...getVariants(product).map((variant) => ({
+      name: variant.name,
+      price: Number(variant.price || 0),
+      stock: Number(variant.stock || 0),
+      sku: variant.sku || "",
+    })),
+  ];
+}
+
 function productDisplayPrice(product) {
-  const variants = Array.isArray(product.variants) ? product.variants : [];
-  if (variants.length === 0) return Number(product.price || 0);
-  return Math.min(...variants.map((variant) => Number(variant.price || 0)));
+  return Math.min(...productChoices(product).map((choice) => Number(choice.price || 0)));
+}
+
+function productTotalStock(product) {
+  return productChoices(product).reduce((sum, choice) => sum + Number(choice.stock || 0), 0);
+}
+
+function hasLowStock(product) {
+  return getAvailability(product) !== "unavailable" && productTotalStock(product) <= LOW_STOCK_LIMIT;
+}
+
+function daysUntil(value) {
+  const date = dateFromInput(value);
+  if (!date) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.ceil((date.getTime() - today.getTime()) / 86400000);
+}
+
+function hasExpiringDate(product) {
+  const days = daysUntil(product.validity);
+  return days !== null && days >= 0 && days <= EXPIRING_DAYS;
+}
+
+function hasMissingCompliance(product) {
+  return !String(product.anvisa || "").trim() || !String(product.batch || "").trim();
+}
+
+function productIssueTags(product) {
+  const tags = [];
+  if (hasLowStock(product)) tags.push("Estoque baixo");
+  if (hasMissingCompliance(product)) tags.push("Conferir lote/ANVISA");
+  if (hasExpiringDate(product)) tags.push("Validade próxima");
+  if (product.active === false) tags.push("Oculto");
+  return tags;
+}
+
+function productMargin(product) {
+  const cost = Number(product.cost || 0);
+  const price = Number(product.price || 0);
+  if (!cost || !price || price < cost) return null;
+  const value = price - cost;
+  const percent = (value / price) * 100;
+  return { value, percent };
 }
 
 async function api(path, options = {}) {
@@ -151,6 +219,8 @@ async function loadDashboard() {
   products = productData.products || [];
   orders = orderData.orders || [];
   renderStats();
+  renderProductFilters();
+  renderAdminAlerts();
   renderProducts();
   renderOrders();
 }
@@ -164,31 +234,146 @@ function renderStats() {
   statProducts.textContent = products.length;
   statOpen.textContent = orders.filter(isOpenOrder).length;
   statRevenue.textContent = formatSummaryPrice(revenue);
+  statToday.textContent = orders.filter(isTodayOrder).length;
+  statOverdue.textContent = orders.filter(isOverdue).length;
+  statLowStock.textContent = products.filter(hasLowStock).length;
+  statExpiring.textContent = products.filter((product) => hasExpiringDate(product) || hasMissingCompliance(product)).length;
+}
+
+function isTodayOrder(order) {
+  if (!order.createdAt) return false;
+  const created = new Date(order.createdAt);
+  const today = new Date();
+  return (
+    created.getFullYear() === today.getFullYear() &&
+    created.getMonth() === today.getMonth() &&
+    created.getDate() === today.getDate()
+  );
+}
+
+function renderProductFilters() {
+  const current = productCategoryFilter.value;
+  const categories = [...new Set(products.map((product) => product.category).filter(Boolean))].sort();
+  productCategoryFilter.innerHTML = `
+    <option value="">Todas</option>
+    ${categories.map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join("")}
+  `;
+  productCategoryFilter.value = categories.includes(current) ? current : "";
+}
+
+function renderAdminAlerts() {
+  const overdue = orders.filter(isOverdue).length;
+  const lowStock = products.filter(hasLowStock).slice(0, 4);
+  const compliance = products.filter((product) => hasMissingCompliance(product) || hasExpiringDate(product)).slice(0, 4);
+  const openOrders = orders.filter(isOpenOrder).length;
+
+  const cards = [
+    {
+      title: overdue ? `${overdue} pedido${overdue > 1 ? "s" : ""} atrasado${overdue > 1 ? "s" : ""}` : "Prazos em dia",
+      text: overdue ? "Revise os prazos em aberto antes de novas confirmações." : "Nenhum pedido aberto com prazo vencido.",
+      tone: overdue ? "danger" : "",
+    },
+    {
+      title: `${lowStock.length} alerta${lowStock.length === 1 ? "" : "s"} de estoque`,
+      text: lowStock.length ? lowStock.map((product) => product.name).join(", ") : "Nenhum produto em estoque baixo.",
+      tone: lowStock.length ? "warning" : "",
+    },
+    {
+      title: `${compliance.length} conferência${compliance.length === 1 ? "" : "s"} pendente${compliance.length === 1 ? "" : "s"}`,
+      text: compliance.length ? compliance.map((product) => product.name).join(", ") : "Lote, ANVISA e validade sem alertas principais.",
+      tone: compliance.length ? "warning" : "",
+    },
+    {
+      title: `${openOrders} pedido${openOrders === 1 ? "" : "s"} em aberto`,
+      text: "Use os filtros rápidos para priorizar atendimento, separação e envio.",
+      tone: "",
+    },
+  ];
+
+  adminAlerts.innerHTML = cards
+    .map(
+      (card) => `
+        <article class="${card.tone}">
+          <strong>${escapeHtml(card.title)}</strong>
+          <p>${escapeHtml(card.text)}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function filteredProducts() {
+  const query = productSearch.value.trim().toLowerCase();
+  const category = productCategoryFilter.value;
+  const filter = productStockFilter.value;
+
+  return products.filter((product) => {
+    const searchable = [
+      product.name,
+      product.category,
+      product.brand,
+      product.sku,
+      product.anvisa,
+      product.batch,
+      ...getVariants(product).flatMap((variant) => [variant.name, variant.sku]),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    const matchesQuery = !query || searchable.includes(query);
+    const matchesCategory = !category || product.category === category;
+    const matchesFilter =
+      !filter ||
+      (filter === "low" && hasLowStock(product)) ||
+      (filter === "missing" && hasMissingCompliance(product)) ||
+      (filter === "expiring" && hasExpiringDate(product)) ||
+      (filter === "hidden" && product.active === false);
+
+    return matchesQuery && matchesCategory && matchesFilter;
+  });
 }
 
 function renderProducts() {
+  const visibleProducts = filteredProducts();
+
   if (products.length === 0) {
     productList.innerHTML = '<div class="empty-state">Nenhum produto cadastrado.</div>';
     return;
   }
 
-  productList.innerHTML = products
+  if (visibleProducts.length === 0) {
+    productList.innerHTML = '<div class="empty-state">Nenhum produto encontrado com esse filtro.</div>';
+    return;
+  }
+
+  productList.innerHTML = visibleProducts
     .map((product) => {
       const availability = getAvailability(product);
-      const variants = Array.isArray(product.variants) ? product.variants : [];
+      const variants = getVariants(product);
+      const issueTags = productIssueTags(product);
+      const totalStock = productTotalStock(product);
+      const validityLabel = product.validity ? formatDate(product.validity) : "Sem validade";
+      const margin = productMargin(product);
       return `
         <article class="admin-product-card">
           <div class="admin-product-head">
+            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
             <div>
               <strong>${escapeHtml(product.name)}</strong>
               <div class="product-card-pills">
                 <span class="pill">${product.active ? "Ativo" : "Oculto"}</span>
                 <span class="pill">${availabilityLabels[availability]}</span>
+                ${issueTags.map((tag) => `<span class="pill warning">${escapeHtml(tag)}</span>`).join("")}
               </div>
             </div>
-            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
           </div>
-          <p>${escapeHtml(product.category)} • ${escapeHtml(product.pack)} • estoque ${Number(product.stock || 0)}</p>
+          <div class="admin-product-meta">
+            <p><strong>Categoria:</strong> ${escapeHtml(product.category)}</p>
+            <p><strong>Embalagem:</strong> ${escapeHtml(product.pack)}</p>
+            <p><strong>Estoque total:</strong> ${totalStock}</p>
+            <p><strong>Validade:</strong> ${escapeHtml(validityLabel)}</p>
+            <p><strong>Margem:</strong> ${margin ? `${formatPrice(margin.value)} (${margin.percent.toFixed(0)}%)` : "Não informada"}</p>
+          </div>
           ${variants.length ? `<p>${variants.length} variação${variants.length > 1 ? "ões" : ""} cadastrada${variants.length > 1 ? "s" : ""}</p>` : ""}
           ${product.brand || product.sku ? `<p>${escapeHtml(product.brand || "Sem marca")} • ${escapeHtml(product.sku || "sem SKU")}</p>` : ""}
           <p>${variants.length ? "A partir de " : ""}${formatPrice(productDisplayPrice(product))}</p>
@@ -201,7 +386,6 @@ function renderProducts() {
     })
     .join("");
 }
-
 function variantRow(variant = {}) {
   return `
     <article class="variant-row">
@@ -293,7 +477,7 @@ function renderOrders() {
             </div>
           </div>
           <div class="order-summary-line">
-            <span><strong>Cliente:</strong> ${escapeHtml(customer.name)} • ${escapeHtml(customer.phone)}</span>
+            <span><strong>Cliente:</strong> ${escapeHtml(customer.name)} â€¢ ${escapeHtml(customer.phone)}</span>
             <span><strong>Total:</strong> ${formatPrice(order.total)}</span>
           </div>
           <div class="order-info-grid">
@@ -325,6 +509,7 @@ function renderOrders() {
               <textarea rows="2" data-order-notes="${escapeHtml(order.id)}">${escapeHtml(order.internalNotes || "")}</textarea>
             </label>
           </div>
+          ${renderOrderHistory(order)}
           <div class="mini-actions">
             <button class="mini-button" type="button" data-save-order="${escapeHtml(order.id)}">Salvar pedido</button>
             <button class="mini-button" type="button" data-deliver-order="${escapeHtml(order.id)}">Marcar entregue</button>
@@ -365,6 +550,7 @@ async function productPayload() {
     salesNotes: formData.get("salesNotes"),
     variants: variantPayload(),
     price: Number(formData.get("price")),
+    cost: Number(formData.get("cost") || 0),
     stock: Number(formData.get("stock")),
     anvisa: formData.get("anvisa"),
     availability: formData.get("availability"),
@@ -401,6 +587,7 @@ function fillProduct(product) {
   productForm.elements.salesNotes.value = product.salesNotes || "";
   renderVariantRows(product.variants || []);
   productForm.elements.price.value = product.price;
+  productForm.elements.cost.value = product.cost || "";
   productForm.elements.stock.value = product.stock ?? 0;
   productForm.elements.anvisa.value = product.anvisa || "";
   productForm.elements.availability.value = getAvailability(product);
@@ -431,6 +618,8 @@ function orderMessage(order) {
   const deadline = order.deadline ? `\nPrazo combinado: ${formatDate(order.deadline)}` : "";
   const delivery = customer.deliveryPreference || order.deliveryMethod || "A combinar";
   const payment = customer.paymentPreference || "A combinar";
+  const address = customer.address ? `\nEndereço/cidade: ${customer.address}` : "";
+  const notes = customer.notes ? `\nObservações do cliente: ${customer.notes}` : "";
 
   return [
     `Olá, ${customer.name || "tudo bem"}! Aqui é da Pluckten Distribuidora Med.`,
@@ -441,10 +630,36 @@ function orderMessage(order) {
     "",
     `Total estimado: ${formatPrice(order.total)}`,
     `Entrega: ${delivery}`,
-    `Pagamento: ${payment}${deadline}`,
+    `Pagamento: ${payment}${deadline}${address}${notes}`,
     "",
-    "Vou confirmar estoque, marca, validade e entrega por aqui.",
+    "Vou confirmar estoque, marca, validade, prazo e forma de entrega por aqui.",
   ].join("\n");
+}
+
+function renderOrderHistory(order) {
+  const history = Array.isArray(order.history) ? order.history : [];
+  if (history.length === 0) return "";
+
+  return `
+    <details class="order-history">
+      <summary>Histórico do pedido</summary>
+      <ol>
+        ${history
+          .slice()
+          .reverse()
+          .map(
+            (entry) => `
+              <li>
+                <strong>${escapeHtml(entry.title || "Atualização")}</strong>
+                <span>${new Date(entry.at || order.updatedAt || order.createdAt).toLocaleString("pt-BR")}</span>
+                ${entry.detail ? `<p>${escapeHtml(entry.detail)}</p>` : ""}
+              </li>
+            `,
+          )
+          .join("")}
+      </ol>
+    </details>
+  `;
 }
 
 async function copyOrderMessage(orderId) {
@@ -465,6 +680,46 @@ async function updateOrder(orderId, patch = {}) {
     }),
   });
   await loadDashboard();
+}
+
+function csvCell(value) {
+  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
+function exportOrdersCsv() {
+  const rows = [
+    ["Pedido", "Criado em", "Status", "Cliente", "Telefone", "Email", "Entrega", "Pagamento", "Prazo", "Total", "Itens"],
+    ...orders.map((order) => {
+      const customer = order.customer || {};
+      const items = (order.items || [])
+        .map((item) => `${item.quantity}x ${item.name}`)
+        .join(" | ");
+      return [
+        order.id,
+        order.createdAt ? new Date(order.createdAt).toLocaleString("pt-BR") : "",
+        order.status || "",
+        customer.name || "",
+        customer.phone || "",
+        customer.email || "",
+        customer.deliveryPreference || order.deliveryMethod || "",
+        customer.paymentPreference || "",
+        order.deadline ? formatDate(order.deadline) : "",
+        Number(order.total || 0).toFixed(2).replace(".", ","),
+        items,
+      ];
+    }),
+  ];
+
+  const csv = rows.map((row) => row.map(csvCell).join(";")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `pedidos-pluckten-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -515,6 +770,10 @@ productForm.elements.image.addEventListener("input", () => {
 
 orderSearch.addEventListener("input", renderOrders);
 orderFilter.addEventListener("change", renderOrders);
+productSearch.addEventListener("input", renderProducts);
+productCategoryFilter.addEventListener("change", renderProducts);
+productStockFilter.addEventListener("change", renderProducts);
+exportOrdersButton.addEventListener("click", exportOrdersCsv);
 orderQuickFilters.forEach((button) => {
   button.addEventListener("click", () => {
     quickOrderFilter = button.dataset.orderQuickFilter || "";

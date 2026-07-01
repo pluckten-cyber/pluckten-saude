@@ -318,6 +318,7 @@ function normalizeProduct(input, existingId) {
     salesNotes: String(input.salesNotes || "").trim(),
     variants: normalizeVariants(input, name),
     price,
+    cost: Math.max(0, Number(input.cost || 0)),
     stock: Math.max(0, Number(input.stock || 0)),
     anvisa: String(input.anvisa || "").trim(),
     availability,
@@ -378,6 +379,11 @@ function phonesMatch(a, b) {
   const right = onlyDigits(b);
   if (!left || !right) return false;
   return left.endsWith(right) || right.endsWith(left);
+}
+
+function publicProduct(product) {
+  const { cost, ...safeProduct } = product || {};
+  return safeProduct;
 }
 
 function publicOrder(order) {
@@ -461,13 +467,21 @@ async function createOrder(payload) {
     items: resolvedItems,
     total: Number(total.toFixed(2)),
     internalNotes: "",
+    history: [
+      {
+        at: now.toISOString(),
+        title: "Pedido recebido",
+        detail: "Cotação enviada pelo site.",
+      },
+    ],
   };
 }
 
 async function handleApi(req, res, pathname) {
   try {
     if (req.method === "GET" && pathname === "/api/products") {
-      sendJson(res, 200, { products: await listProducts() });
+      const products = await listProducts();
+      sendJson(res, 200, { products: products.map(publicProduct) });
       return true;
     }
 
@@ -572,13 +586,32 @@ async function handleApi(req, res, pathname) {
       if (!order) throw new Error("Pedido não encontrado.");
 
       const body = await readBody(req);
+      const nextStatus = String(body.status || order.status);
+      const nextDeadline = String(body.deadline || "");
+      const nextNotes = String(body.internalNotes || "");
+      const history = Array.isArray(order.history) ? [...order.history] : [];
+      const changes = [];
+      if (nextStatus !== order.status) changes.push(`Status: ${order.status || "novo"} -> ${nextStatus}`);
+      if (nextDeadline !== String(order.deadline || "")) {
+        changes.push(`Prazo: ${order.deadline ? order.deadline : "a combinar"} -> ${nextDeadline || "a combinar"}`);
+      }
+      if (nextNotes !== String(order.internalNotes || "")) changes.push("Observação interna atualizada");
+      if (changes.length > 0) {
+        history.push({
+          at: new Date().toISOString(),
+          title: "Pedido atualizado",
+          detail: changes.join(" | "),
+        });
+      }
+
       const nextOrder = {
         ...order,
-        status: String(body.status || order.status),
-        deadline: String(body.deadline || ""),
+        status: nextStatus,
+        deadline: nextDeadline,
         deliveryMethod: String(body.deliveryMethod || order.deliveryMethod || ""),
-        internalNotes: String(body.internalNotes || ""),
+        internalNotes: nextNotes,
         updatedAt: new Date().toISOString(),
+        history,
       };
       await saveOrder(nextOrder);
       sendJson(res, 200, { order: nextOrder });

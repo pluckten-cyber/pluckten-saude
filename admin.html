@@ -62,8 +62,26 @@
               <span data-stat-revenue>R$ 0</span>
               <strong>em pedidos</strong>
             </article>
+            <article>
+              <span data-stat-today>0</span>
+              <strong>hoje</strong>
+            </article>
+            <article>
+              <span data-stat-overdue>0</span>
+              <strong>atrasados</strong>
+            </article>
+            <article>
+              <span data-stat-low-stock>0</span>
+              <strong>estoque baixo</strong>
+            </article>
+            <article>
+              <span data-stat-expiring>0</span>
+              <strong>validade/lote</strong>
+            </article>
           </div>
         </section>
+
+        <section class="admin-alerts" data-admin-alerts></section>
 
         <section class="admin-grid">
           <section class="admin-panel">
@@ -72,7 +90,10 @@
                 <p class="eyebrow">Pedidos</p>
                 <h2>Vendas e prazos</h2>
               </div>
-              <button class="button ghost" type="button" data-refresh>Atualizar</button>
+              <div class="panel-actions">
+                <button class="button ghost" type="button" data-export-orders>Exportar CSV</button>
+                <button class="button ghost" type="button" data-refresh>Atualizar</button>
+              </div>
             </div>
             <div class="admin-toolbar">
               <label class="admin-field">
@@ -108,6 +129,28 @@
                 <h2>Produtos</h2>
               </div>
               <button class="button ghost" type="button" data-new-product>Novo</button>
+            </div>
+            <div class="admin-toolbar product-toolbar">
+              <label class="admin-field">
+                Buscar produto
+                <input type="search" placeholder="Nome, marca, SKU ou ANVISA" data-product-search>
+              </label>
+              <label class="admin-field">
+                Categoria
+                <select data-product-category-filter>
+                  <option value="">Todas</option>
+                </select>
+              </label>
+              <label class="admin-field">
+                Filtro
+                <select data-product-stock-filter>
+                  <option value="">Todos</option>
+                  <option value="low">Estoque baixo</option>
+                  <option value="missing">Sem lote/ANVISA</option>
+                  <option value="expiring">Validade próxima</option>
+                  <option value="hidden">Ocultos</option>
+                </select>
+              </label>
             </div>
 
             <form class="product-form" data-product-form>
@@ -153,6 +196,12 @@
                   Preço
                   <input name="price" type="number" min="0" step="0.01" required>
                 </label>
+                <label class="admin-field">
+                  Custo (opcional)
+                  <input name="cost" type="number" min="0" step="0.01" placeholder="Para calcular margem">
+                </label>
+              </div>
+              <div class="form-row">
                 <label class="admin-field">
                   Estoque
                   <input name="stock" type="number" min="0" step="1" required>
